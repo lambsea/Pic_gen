@@ -1,9 +1,9 @@
 'use strict';
 
 const LEVELS = { ERROR: 0, WARN: 1, INFO: 2, DEBUG: 3 };
+const currentLevel = process.env.LOG_LEVEL || 'INFO';
 
 function log(level, message, meta = {}) {
-  const currentLevel = process.env.LOG_LEVEL || 'INFO';
   if (LEVELS[level] <= LEVELS[currentLevel]) {
     const entry = {
       timestamp: new Date().toISOString(),

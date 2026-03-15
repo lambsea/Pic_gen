@@ -120,7 +120,7 @@ router.post('/generate', async (req, res, next) => {
   ensureOutputsDir();
   const outputPath = path.join(OUTPUTS_DIR, `${jobId}.json`);
   try {
-    fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
+    await fs.promises.writeFile(outputPath, JSON.stringify(result, null, 2));
     logger.info('Result saved to disk', { jobId, path: outputPath });
   } catch (saveErr) {
     logger.warn('Failed to save result to disk', { jobId, error: saveErr.message });

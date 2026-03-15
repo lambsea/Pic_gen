@@ -96,6 +96,8 @@ async function generateDesignJSON({ title, articleText, category, language_overr
   let lastRawResponse = '';
   let lastErrors = [];
 
+  // Attempt loop: attempt 0 = initial call, attempts 1..CLAUDE_MAX_RETRIES = repair retries
+  // Total calls = CLAUDE_MAX_RETRIES + 1 (default: 3 total)
   for (let attempt = 0; attempt <= CLAUDE_MAX_RETRIES; attempt++) {
     let rawResponse;
 

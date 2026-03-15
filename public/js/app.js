@@ -238,7 +238,7 @@
     }
 
     // Color scheme badge
-    var theme = (data.theme || '').toLowerCase();
+    var theme = (data.color_scheme || '').toLowerCase();
     schemeBadge.textContent = theme === 'light' ? 'Light theme' : 'Dark theme';
     schemeBadge.className = 'scheme-badge ' + (theme === 'light' ? 'light' : 'dark');
 
@@ -264,7 +264,7 @@
 
     // Download button
     downloadBtn.href = data.imageUrl || '#';
-    downloadBtn.download = slugify(data.cover_title || 'cover') + '.png';
+    downloadBtn.download = slugify(data.cover_title || 'cover') + '.jpg';
 
     // Copy prompt button
     var imagePrompt = data.image_prompt || '';

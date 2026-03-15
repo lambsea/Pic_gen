@@ -11,7 +11,8 @@
     "detected_language",
     "color_scheme",
     "layout_spec",
-    "brand_checklist"
+    "brand_checklist",
+    "topic_tags"
   ],
   "properties": {
     "cover_title": {
