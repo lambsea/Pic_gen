@@ -1,0 +1,14 @@
+Your previous response failed JSON schema validation. You must fix ALL validation errors listed below.
+
+VALIDATION ERRORS:
+{{VALIDATION_ERRORS}}
+
+YOUR PREVIOUS RESPONSE:
+{{PREVIOUS_RESPONSE}}
+
+INSTRUCTIONS:
+1. Fix ONLY the validation errors listed above
+2. Keep all other fields exactly as they were
+3. Return ONLY the corrected JSON object
+4. No markdown, no code fences, no explanation
+5. The JSON must pass schema validation

@@ -1,0 +1,68 @@
+{
+  "brand_name": "Your Brand",
+  "brand_tagline": "Insights that move the world forward",
+  "industry": "Tech / Marketing / Growth / AI",
+  "tone": ["professional", "future-forward", "clean", "authoritative"],
+  "visual_identity": {
+    "dark_variant": {
+      "primary_bg": "#0A0A0A",
+      "secondary_bg": "#1A1A2E",
+      "accent_color": "#00FFAA",
+      "text_primary": "#FFFFFF",
+      "text_secondary": "#B0B0B0",
+      "use_case": "English articles — professional, future-forward, high-contrast",
+      "mood": "cinematic, tech-forward, premium"
+    },
+    "light_variant": {
+      "primary_bg": "#F5F7FA",
+      "secondary_bg": "#FFFFFF",
+      "accent_color": "#2C5282",
+      "text_primary": "#1A202C",
+      "text_secondary": "#4A5568",
+      "use_case": "Chinese articles — clean, authoritative, editorial",
+      "mood": "crisp, editorial, trustworthy"
+    }
+  },
+  "typography_rules": {
+    "headline_max_chars_en": 60,
+    "headline_max_chars_zh": 20,
+    "font_style": "clean, modern, geometric sans-serif",
+    "weight": "ultra-bold condensed",
+    "alignment": "center preferred, left for data-heavy topics"
+  },
+  "image_style_rules": [
+    "NO text, typography, words, letters, or numbers in the image",
+    "NO logos, brand marks, or watermarks in the image",
+    "cinematic lighting with strong directional light source",
+    "one strong central visual metaphor — avoid multiple competing subjects",
+    "strong negative space in the lower portion for title text overlay",
+    "clean edges, no heavy vignette",
+    "high contrast between subject and background",
+    "photorealistic or premium digital illustration quality",
+    "no generic stock photo aesthetic",
+    "no cluttered or busy backgrounds"
+  ],
+  "forbidden_elements": [
+    "generic stock illustration style",
+    "messy or cluttered backgrounds",
+    "AI-generated gibberish text visible in image",
+    "heavy muddy shadows",
+    "overcrowded composition",
+    "multiple faces or portraits",
+    "explicit corporate clipart",
+    "low-resolution or pixelated elements"
+  ],
+  "safe_text_area": "Preserve at least the bottom 40% of the image as clean, lower-contrast area suitable for title text overlay",
+  "logo_position": "bottom-right corner (handled in Figma, not in AI image)",
+  "export_size": {
+    "width": 1200,
+    "height": 675,
+    "format": "JPG",
+    "aspect_ratio": "16:9"
+  },
+  "layout_templates": {
+    "A": "Full-bleed image as background, title text overlay at bottom — best for editorial, general topics",
+    "B": "Image fills top 60%, solid color band at bottom 40% for title — best for data/analysis/research topics",
+    "C": "Left-aligned strong image element with open right/bottom space for title — best for opinion/commentary"
+  }
+}
