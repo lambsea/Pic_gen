@@ -1,0 +1,41 @@
+{
+  "platforms": [
+    {
+      "id": "twitter_article",
+      "label": "Twitter / X Article",
+      "width": 1200,
+      "height": 480,
+      "ratio": "5:2",
+      "cssRatio": "5 / 2",
+      "comingSoon": false
+    },
+    {
+      "id": "linkedin_article",
+      "label": "LinkedIn Article",
+      "width": 1200,
+      "height": 628,
+      "ratio": "1.91:1",
+      "cssRatio": "1200 / 628",
+      "comingSoon": true
+    },
+    {
+      "id": "instagram_landscape",
+      "label": "Instagram 横版",
+      "width": 1080,
+      "height": 566,
+      "ratio": "1.91:1",
+      "cssRatio": "1080 / 566",
+      "comingSoon": true
+    },
+    {
+      "id": "wechat_cover",
+      "label": "微信公众号封面",
+      "width": 1200,
+      "height": 675,
+      "ratio": "16:9",
+      "cssRatio": "16 / 9",
+      "comingSoon": true
+    }
+  ],
+  "default": "twitter_article"
+}

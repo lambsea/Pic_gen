@@ -36,15 +36,24 @@ function ensureOutputsDir() {
  * @returns {Promise<{ remoteUrl: string, localFilename: string, localPath: string }>}
  * @throws {RecraftAPIError} after max retries
  */
-async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null) {
+async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null, widthOverride = null, heightOverride = null) {
   const apiKey = process.env.RECRAFT_API_KEY;
   if (!apiKey) {
     throw new RecraftAPIError('RECRAFT_API_KEY environment variable is not set');
   }
 
   const effectiveStyleId = styleIdOverride || RECRAFT_STYLE_ID;
+  const effectiveWidth   = widthOverride  || IMAGE_WIDTH;
+  const effectiveHeight  = heightOverride || IMAGE_HEIGHT;
 
-  logger.info('Calling Recraft API', { model: RECRAFT_MODEL, attempt: retryCount, promptLength: imagePrompt.length, styleId: effectiveStyleId });
+  logger.info('Calling Recraft API', {
+    model: RECRAFT_MODEL,
+    attempt: retryCount,
+    promptLength: imagePrompt.length,
+    styleId: effectiveStyleId,
+    width: effectiveWidth,
+    height: effectiveHeight
+  });
 
   let remoteUrl;
   try {
@@ -54,8 +63,8 @@ async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null
         model: RECRAFT_MODEL,
         prompt: imagePrompt,
         n: 1,
-        width: IMAGE_WIDTH,
-        height: IMAGE_HEIGHT,
+        width: effectiveWidth,
+        height: effectiveHeight,
         response_format: 'url',
         ...(effectiveStyleId && { style_id: effectiveStyleId })
       },
@@ -81,7 +90,7 @@ async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null
       const delay = RETRY_BASE_DELAY_MS * Math.pow(2, retryCount);
       logger.info(`Retrying Recraft in ${delay}ms`, { nextAttempt: retryCount + 1 });
       await sleep(delay);
-      return generateImage(imagePrompt, retryCount + 1, styleIdOverride);
+      return generateImage(imagePrompt, retryCount + 1, styleIdOverride, widthOverride, heightOverride);
     }
 
     throw new RecraftAPIError(`Recraft API failed after ${retryCount + 1} attempts: ${errMsg}`);

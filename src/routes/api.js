@@ -8,6 +8,13 @@ const axios = require('axios');
 const sharp = require('sharp');
 const router = express.Router();
 
+const platformsData = JSON.parse(
+  fs.readFileSync(path.resolve(process.cwd(), 'data', 'platforms.json'), 'utf-8')
+);
+const PLATFORMS_MAP = {};
+platformsData.platforms.forEach(p => { PLATFORMS_MAP[p.id] = p; });
+const DEFAULT_PLATFORM_ID = platformsData.default || 'twitter_article';
+
 const { version } = require('../../package.json');
 const logger = require('../utils/logger');
 const { ValidationError, ArticleExtractionError, ShortContentError } = require('../middleware/errorHandler');
@@ -94,11 +101,11 @@ router.get('/health', (req, res) => {
 // POST /api/generate
 // -----------------------------------------------
 router.post('/generate', async (req, res, next) => {
-  const { title, url, category, language_override, style_id } = req.body || {};
+  const { title, url, category, language_override, style_id, platform, author } = req.body || {};
   const jobId = uuidv4();
   req.jobId = jobId; // attach for error handler logging
 
-  logger.info('Generation request received', { jobId, title, url, category, language_override, style_id });
+  logger.info('Generation request received', { jobId, title, url, category, language_override, style_id, platform, author });
 
   // --- Input Validation ---
   if (!title || typeof title !== 'string' || title.trim().length === 0) {
@@ -145,10 +152,18 @@ router.post('/generate', async (req, res, next) => {
     return next(err);
   }
 
+  // --- Resolve platform dimensions ---
+  const platformId = (platform && PLATFORMS_MAP[platform]) ? platform : DEFAULT_PLATFORM_ID;
+  const platformCfg = PLATFORMS_MAP[platformId];
+  const imageWidth  = platformCfg.width;
+  const imageHeight = platformCfg.height;
+
   // --- Recraft: Generate Image ---
   let imageResult;
   try {
-    imageResult = await recraftService.generateImage(claudeOutput.image_prompt, 0, style_id || null);
+    imageResult = await recraftService.generateImage(
+      claudeOutput.image_prompt, 0, style_id || null, imageWidth, imageHeight
+    );
   } catch (err) {
     return next(err);
   }
@@ -165,6 +180,9 @@ router.post('/generate', async (req, res, next) => {
     imageUrl,
     imageRemoteUrl: imageResult.remoteUrl,
     style_id: style_id || null,
+    platform: platformId,
+    platformCfg,
+    author: (author && typeof author === 'string') ? author.trim() : null,
     generatedAt: new Date().toISOString(),
     mode,
     input: {
@@ -273,6 +291,13 @@ router.get('/recraft-styles', (req, res) => {
   } catch (err) {
     res.json({ styles: [], default: null });
   }
+});
+
+// -----------------------------------------------
+// GET /api/platforms
+// -----------------------------------------------
+router.get('/platforms', (req, res) => {
+  res.json(platformsData);
 });
 
 // -----------------------------------------------
