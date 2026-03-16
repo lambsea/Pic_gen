@@ -57,7 +57,34 @@
             <span class="field-hint" id="url-hint">Optional — provide a URL to enrich content analysis</span>
           </div>
 
+          <div class="field-group">
+            <label class="field-label" for="author">Author Handle</label>
+            <input
+              type="text"
+              id="author"
+              name="author"
+              class="field-input"
+              placeholder="@username (optional)"
+              autocomplete="off"
+              aria-describedby="author-hint"
+            >
+            <span class="field-hint" id="author-hint">Your Twitter handle — displayed on the cover</span>
+          </div>
+
           <div class="field-row">
+            <div class="field-group">
+              <label class="field-label" for="platform">Platform</label>
+              <div class="select-wrapper">
+                <select id="platform" name="platform" class="field-select" aria-label="Target platform">
+                  <!-- populated by JS from /api/platforms -->
+                </select>
+                <span class="select-arrow" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
             <div class="field-group field-grow">
               <label class="field-label" for="category">Category</label>
               <input
@@ -129,8 +156,10 @@
           <img class="compositor-base-image" id="compositor-base-image" src="" alt="">
           <div class="compositor-overlay" id="compositor-overlay"></div>
           <div class="compositor-text" id="compositor-text">
+            <div class="compositor-decorator" id="compositor-decorator" aria-hidden="true"></div>
             <div class="compositor-title" id="compositor-title"></div>
             <div class="compositor-subtitle" id="compositor-subtitle"></div>
+            <div class="compositor-author" id="compositor-author"></div>
           </div>
         </div>
 
@@ -197,6 +226,49 @@
               >
               <span class="compositor-opacity-label" aria-hidden="true">Dark</span>
               <span class="compositor-opacity-value" id="compositor-opacity-value" aria-live="polite">45%</span>
+            </div>
+          </div>
+
+          <!-- Font color -->
+          <div class="compositor-field">
+            <div class="compositor-field--row compositor-color-row">
+              <span class="compositor-label">Text Color</span>
+              <div class="compositor-color-swatches" id="compositor-color-swatches"></div>
+              <input
+                type="color"
+                id="compositor-font-color"
+                class="compositor-color-picker"
+                value="#ffffff"
+                aria-label="Font color"
+              >
+            </div>
+          </div>
+
+          <!-- Text visibility -->
+          <div class="compositor-field compositor-field--row">
+            <span class="compositor-label">Show Text</span>
+            <label class="compositor-toggle" aria-label="Show text overlay">
+              <input type="checkbox" id="compositor-text-toggle" checked>
+              <span class="compositor-toggle-track"></span>
+            </label>
+          </div>
+
+          <!-- Text horizontal position -->
+          <div class="compositor-field">
+            <div class="compositor-label">Text Position</div>
+            <div class="compositor-hpos-btns" id="compositor-hpos-btns" role="group" aria-label="Horizontal text position">
+              <button type="button" class="compositor-hpos-btn active" data-pos="left" aria-label="Align left">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Left
+              </button>
+              <button type="button" class="compositor-hpos-btn" data-pos="center" aria-label="Align center">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4h8M3 8h10M4 12h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Center
+              </button>
+              <button type="button" class="compositor-hpos-btn" data-pos="right" aria-label="Align right">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M6 8h8M4 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Right
+              </button>
             </div>
           </div>
 

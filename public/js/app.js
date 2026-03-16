@@ -72,10 +72,20 @@
   var subtitleToggle     = document.getElementById('compositor-subtitle-toggle');
   var opacitySlider      = document.getElementById('compositor-opacity');
   var opacityValueEl     = document.getElementById('compositor-opacity-value');
+  var fontColorPicker    = document.getElementById('compositor-font-color');
+  var colorSwatchesEl    = document.getElementById('compositor-color-swatches');
   var fontCardsEn        = document.getElementById('font-cards-en');
   var fontCardsZh        = document.getElementById('font-cards-zh');
   var compositorDlBtn    = document.getElementById('compositor-download-btn');
   var downloadOriginalBtn = document.getElementById('download-original-btn');
+
+  var authorInput          = document.getElementById('author');
+  var platformSelect       = document.getElementById('platform');
+
+  var compositorAuthorEl   = document.getElementById('compositor-author');
+  var compositorDecorEl    = document.getElementById('compositor-decorator');
+  var textVisibilityToggle = document.getElementById('compositor-text-toggle');
+  var hposBtns             = document.getElementById('compositor-hpos-btns');
 
   /* ----------------------------------------------------------
      State
@@ -87,6 +97,7 @@
   var fontsConfig       = [];   // array of font objects from /api/fonts-config
   var pendingDefaultLang = null;
   var selectedStyleId = null;
+  var platformsMap = {};
 
   /* ----------------------------------------------------------
      State Machine
@@ -181,7 +192,15 @@
     var category          = categoryInput.value.trim();
     var language_override = langSelect.value;
 
-    generateCover({ title: title, url: url, category: category, language_override: language_override, style_id: selectedStyleId });
+    generateCover({
+      title: title,
+      url: url,
+      category: category,
+      language_override: language_override,
+      style_id: selectedStyleId,
+      author: authorInput ? authorInput.value.trim() : '',
+      platform: platformSelect ? platformSelect.value : 'twitter_article'
+    });
   });
 
   titleInput.addEventListener('input', function () {
@@ -317,7 +336,18 @@
      Show Error
   ---------------------------------------------------------- */
   function showError(message) {
-    errorMessage.textContent = message || 'An unexpected error occurred.';
+    // message may be a string, an Error object, or an API error object {code, message}
+    var text;
+    if (!message) {
+      text = 'An unexpected error occurred. Please try again.';
+    } else if (typeof message === 'string') {
+      text = message;
+    } else if (message.message) {
+      text = message.code ? '[' + message.code + '] ' + message.message : message.message;
+    } else {
+      text = JSON.stringify(message);
+    }
+    errorMessage.textContent = text;
     setState('error');
   }
 
@@ -428,6 +458,23 @@
         if (!container || !fieldGroup) return;
 
         clearChildren(container);
+        // Prepend Auto (no style) option
+        var autoBtn = document.createElement('button');
+        autoBtn.type = 'button';
+        autoBtn.className = 'style-card';
+        autoBtn.dataset.styleId = '';
+        autoBtn.setAttribute('aria-label', 'Auto — no style constraint');
+        var autoNameEl = document.createElement('span');
+        autoNameEl.className = 'style-card__name';
+        autoNameEl.textContent = 'Auto (AI decides)';
+        autoBtn.appendChild(autoNameEl);
+        autoBtn.addEventListener('click', function () {
+          selectedStyleId = null;
+          document.querySelectorAll('.style-card').forEach(function (c) {
+            c.classList.toggle('active', c.dataset.styleId === '');
+          });
+        });
+        container.appendChild(autoBtn);
         styles.forEach(function (style) {
           var btn = document.createElement('button');
           btn.type = 'button';
@@ -453,6 +500,38 @@
         fieldGroup.style.display = '';
       })
       .catch(function () { /* styles unavailable — degrade gracefully */ });
+  }
+
+  /* ----------------------------------------------------------
+     Platform Selector
+  ---------------------------------------------------------- */
+  function loadPlatforms() {
+    fetch('/api/platforms')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var platforms = data.platforms || [];
+        var defaultId = data.default || '';
+        if (!platformSelect) return;
+        clearChildren(platformSelect);
+        platforms.forEach(function (p) {
+          var opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.label + (p.comingSoon ? ' (coming soon)' : '');
+          opt.disabled = !!p.comingSoon;
+          if (p.id === defaultId) opt.selected = true;
+          platformSelect.appendChild(opt);
+        });
+        platformsMap = {};
+        platforms.forEach(function (p) { platformsMap[p.id] = p; });
+        applyPlatformRatio(defaultId);
+      })
+      .catch(function () { /* degrade gracefully */ });
+  }
+
+  function applyPlatformRatio(platformId) {
+    var p = platformsMap && platformsMap[platformId];
+    if (!p || !compositorEl) return;
+    compositorEl.style.setProperty('--platform-ratio', p.cssRatio);
   }
 
   /* ----------------------------------------------------------
@@ -558,10 +637,9 @@
     subtitleToggle.checked = hasSubtitle;
     compositorSubEl.hidden = !hasSubtitle;
 
-    // Text color based on color_scheme
-    var isDark = (data.color_scheme || 'dark').toLowerCase() !== 'light';
-    compositorTitleEl.classList.toggle('text-dark', !isDark);
-    compositorSubEl.classList.toggle('text-dark', !isDark);
+    // Text color: default white, user can change via color picker
+    applyFontColor('#ffffff');
+    fontColorPicker.value = '#ffffff';
 
     // Template variant — center-align for template B
     var variant = data.layout_spec && data.layout_spec.template_variant;
@@ -593,6 +671,11 @@
     opacityValueEl.textContent = Math.round(value * 100) + '%';
   }
 
+  function applyFontColor(hex) {
+    compositorTitleEl.style.color = hex;
+    compositorSubEl.style.color = hex;
+  }
+
   /* ----------------------------------------------------------
      Live Preview Listeners
   ---------------------------------------------------------- */
@@ -613,10 +696,53 @@
       updateOverlayOpacity(parseFloat(opacitySlider.value));
     });
 
+    // Font color picker
+    fontColorPicker.addEventListener('input', function () {
+      applyFontColor(fontColorPicker.value);
+      // Deactivate all swatches when custom color is chosen
+      var swatches = colorSwatchesEl.querySelectorAll('.compositor-color-swatch');
+      swatches.forEach(function (s) { s.classList.remove('active'); });
+    });
+
+    // Color preset swatches
+    var COLOR_PRESETS = [
+      { hex: '#ffffff', label: 'White' },
+      { hex: '#000000', label: 'Black' },
+      { hex: '#F5F0E8', label: 'Cream' },
+      { hex: '#FFD700', label: 'Gold' },
+      { hex: '#00FFAA', label: 'Mint' },
+      { hex: '#60A5FA', label: 'Sky' }
+    ];
+    COLOR_PRESETS.forEach(function (preset) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'compositor-color-swatch' + (preset.hex === '#ffffff' ? ' active' : '');
+      btn.style.background = preset.hex;
+      // Add a subtle border for white swatch visibility
+      if (preset.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)';
+      btn.setAttribute('aria-label', preset.label);
+      btn.setAttribute('title', preset.label);
+      btn.addEventListener('click', function () {
+        applyFontColor(preset.hex);
+        fontColorPicker.value = preset.hex;
+        colorSwatchesEl.querySelectorAll('.compositor-color-swatch').forEach(function (s) {
+          s.classList.remove('active');
+        });
+        btn.classList.add('active');
+      });
+      colorSwatchesEl.appendChild(btn);
+    });
+
     compositorDlBtn.addEventListener('click', function () {
       var titleSlug = slugify(compTitleInput.value || 'cover');
       downloadComposited(titleSlug);
     });
+
+    if (platformSelect) {
+      platformSelect.addEventListener('change', function () {
+        applyPlatformRatio(platformSelect.value);
+      });
+    }
   }
 
   /* ----------------------------------------------------------
@@ -667,6 +793,7 @@
   ---------------------------------------------------------- */
   loadFonts();
   loadStyleSelector();
+  loadPlatforms();
   initCompositorListeners();
   currentState = 'loading'; // trick setState into running for 'form'
   setState('form');
