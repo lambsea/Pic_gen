@@ -6,50 +6,58 @@
 /* --- Custom Properties ------------------------------------ */
 :root {
   /* === Base surface — neumorphism requires bg ≈ element color === */
-  --bg-page:        #0C0F18;
-  --bg-surface:     #111520;   /* cards, raised elements */
-  --bg-inset:       #090C14;   /* inputs, recessed elements */
-  --bg-spec:        #090C14;
+  /* Palette: 长春花蓝 #5357A0 · 佛手黄 #FED81F · 荔枝白 #FEFFEF  */
+  --bg-page:        #0B0D1C;   /* near-black, blue-purple cast */
+  --bg-surface:     #10132A;   /* cards, raised elements */
+  --bg-inset:       #080A16;   /* inputs, recessed elements */
+  --bg-spec:        #080A16;
 
   /* === Neumorphic shadow system === */
-  --neu-dark:       rgba(4,6,12,0.9);
-  --neu-light:      rgba(255,255,255,0.045);
+  --neu-dark:       rgba(3,4,10,0.92);
+  --neu-light:      rgba(255,255,255,0.05);
   --shadow-raised:  6px 6px 16px var(--neu-dark), -4px -4px 10px var(--neu-light);
   --shadow-raised-sm: 4px 4px 10px var(--neu-dark), -3px -3px 7px var(--neu-light);
   --shadow-inset:   inset 4px 4px 10px var(--neu-dark), inset -3px -3px 8px var(--neu-light);
   --shadow-inset-sm: inset 3px 3px 7px var(--neu-dark), inset -2px -2px 5px var(--neu-light);
   --shadow-flat:    2px 2px 5px var(--neu-dark), -1px -1px 3px var(--neu-light);
-  --shadow-glow-accent: 0 0 20px rgba(99,102,241,0.3);
+  --shadow-glow-accent: 0 0 20px rgba(83,87,160,0.4);
 
   /* === Glass overlay === */
-  --glass-bg:       rgba(255,255,255,0.03);
+  --glass-bg:       rgba(83,87,160,0.04);
   --glass-border:   rgba(255,255,255,0.07);
   --glass-border-hi: rgba(255,255,255,0.12);
 
-  /* === Accent — electric indigo === */
-  --accent:         #6366F1;
-  --accent-hover:   #818CF8;
-  --accent-subtle:  rgba(99,102,241,0.12);
-  --accent-glow:    rgba(99,102,241,0.3);
-  --accent-dim:     rgba(99,102,241,0.15);
-  --accent-border:  rgba(99,102,241,0.4);
+  /* === Primary accent — 长春花蓝 === */
+  --accent:         #5357A0;
+  --accent-hover:   #6B70C4;
+  --accent-subtle:  rgba(83,87,160,0.14);
+  --accent-glow:    rgba(83,87,160,0.4);
+  --accent-dim:     rgba(83,87,160,0.15);
+  --accent-border:  rgba(83,87,160,0.45);
 
-  /* === Text hierarchy === */
-  --text-primary:   #E2E8F0;
-  --text-secondary: #8892A4;
-  --text-muted:     #404860;
-  --text-on-accent: #FFFFFF;
+  /* === Warm accent — 佛手黄 (CTA + highlights) === */
+  --accent-warm:        #FED81F;
+  --accent-warm-hover:  #FFE456;
+  --accent-warm-dark:   #C8A900;
+  --accent-warm-glow:   rgba(254,216,31,0.35);
+  --accent-warm-subtle: rgba(254,216,31,0.12);
+
+  /* === Text hierarchy — 荔枝白 family === */
+  --text-primary:   #FEFFEF;   /* 荔枝白 */
+  --text-secondary: #9196C0;
+  --text-muted:     #3D4170;
+  --text-on-accent: #0B0D1C;  /* dark text on yellow CTA */
 
   /* === Semantic colors === */
   --error:          #F87171;
   --error-subtle:   rgba(248,113,113,0.1);
-  --amber:          #F59E0B;
+  --amber:          #FED81F;
   --green:          #10B981;
 
   /* === Border === */
   --border:         rgba(255,255,255,0.07);
   --border-hover:   rgba(255,255,255,0.12);
-  --border-focus:   rgba(99,102,241,0.6);
+  --border-focus:   rgba(83,87,160,0.65);
 
   /* === Radius === */
   --radius-card:    20px;
@@ -102,23 +110,26 @@ a:hover { color: var(--accent-hover); }
 }
 
 .ambient-blob--1 {
-  width: 560px; height: 560px;
-  background: radial-gradient(circle, rgba(99,102,241,0.09) 0%, transparent 70%);
-  top: -120px; left: -120px;
+  width: 580px; height: 580px;
+  /* 长春花蓝 glow — top-left */
+  background: radial-gradient(circle, rgba(83,87,160,0.13) 0%, transparent 70%);
+  top: -140px; left: -140px;
   animation: blob-float 22s ease-in-out infinite;
 }
 
 .ambient-blob--2 {
-  width: 420px; height: 420px;
-  background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
-  top: 35%; right: -100px;
+  width: 440px; height: 440px;
+  /* 佛手黄 glow — mid-right */
+  background: radial-gradient(circle, rgba(254,216,31,0.07) 0%, transparent 70%);
+  top: 35%; right: -120px;
   animation: blob-float 18s ease-in-out infinite reverse;
   animation-delay: -8s;
 }
 
 .ambient-blob--3 {
-  width: 380px; height: 380px;
-  background: radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%);
+  width: 400px; height: 400px;
+  /* 长春花蓝 soft — bottom-centre */
+  background: radial-gradient(circle, rgba(83,87,160,0.08) 0%, transparent 70%);
   bottom: -100px; left: 35%;
   animation: blob-float 25s ease-in-out infinite;
   animation-delay: -15s;
@@ -177,15 +188,15 @@ main {
   flex-shrink: 0;
   width: 38px; height: 38px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
+  background: linear-gradient(135deg, #5357A0 0%, #3D4080 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   /* Raised neumorphic logo */
   box-shadow:
-    4px 4px 10px rgba(4,6,12,0.8),
-    -2px -2px 6px rgba(255,255,255,0.08),
-    0 0 18px rgba(99,102,241,0.35);
+    4px 4px 10px rgba(3,4,10,0.85),
+    -2px -2px 6px rgba(255,255,255,0.07),
+    0 0 18px rgba(83,87,160,0.45);
 }
 
 .logo-mark svg { width: 18px; height: 18px; }
@@ -290,7 +301,7 @@ main {
   box-shadow:
     var(--shadow-inset),
     0 0 0 2px var(--accent-subtle),
-    inset 0 0 12px rgba(99,102,241,0.06);
+    inset 0 0 12px rgba(83,87,160,0.06);
 }
 
 .field-input.invalid {
@@ -368,36 +379,38 @@ main {
   outline-offset: 3px;
 }
 
-/* Primary — raised neumorphic with glass gradient */
+/* Primary — raised neumorphic, 佛手黄 CTA */
 .btn-primary {
-  background: linear-gradient(135deg, #5558E8 0%, #7B7EF4 60%, #9599F8 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #FED81F 0%, #FFE556 55%, #FED81F 100%);
+  color: #0B0D1C;   /* dark text on yellow for contrast */
+  font-weight: 700;
   box-shadow:
     var(--shadow-raised),
-    0 0 20px rgba(99,102,241,0.3);
-  border: 1px solid rgba(150,153,248,0.25);
-  border-top-color: rgba(255,255,255,0.25);
+    0 0 22px rgba(254,216,31,0.28);
+  border: 1px solid rgba(255,229,86,0.35);
+  border-top-color: rgba(255,255,255,0.45);
 }
 
 .btn-primary::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 55%);
   border-radius: inherit;
   pointer-events: none;
 }
 
 .btn-primary:hover {
+  background: linear-gradient(135deg, #FFE456 0%, #FFF0A0 55%, #FFE456 100%);
   box-shadow:
     8px 8px 20px var(--neu-dark),
     -5px -5px 12px var(--neu-light),
-    0 0 28px rgba(99,102,241,0.4);
+    0 0 32px rgba(254,216,31,0.38);
   transform: translateY(-1px);
 }
 
 .btn-primary:active {
-  box-shadow: var(--shadow-inset-sm), 0 0 12px rgba(99,102,241,0.2);
+  box-shadow: var(--shadow-inset-sm), 0 0 14px rgba(254,216,31,0.2);
   transform: scale(0.98);
 }
 
@@ -484,10 +497,10 @@ main {
 /* Active tab — raised out of the inset tray */
 .mode-tab.active {
   background: var(--bg-surface);
-  color: var(--accent-hover);
+  color: var(--accent-warm);
   box-shadow:
     var(--shadow-raised-sm),
-    0 0 12px rgba(99,102,241,0.15);
+    0 0 12px rgba(83,87,160,0.15);
   border: 1px solid var(--accent-border);
   border-top-color: rgba(255,255,255,0.1);
 }
@@ -524,7 +537,7 @@ main {
   background: var(--bg-inset);
   border-color: var(--accent-border);
   color: var(--accent-hover);
-  box-shadow: var(--shadow-inset-sm), 0 0 8px rgba(99,102,241,0.2);
+  box-shadow: var(--shadow-inset-sm), 0 0 8px rgba(83,87,160,0.2);
 }
 
 .style-card__name { font-size: 12px; }
@@ -557,8 +570,8 @@ main {
   border-radius: 50%;
   border: 2.5px solid transparent;
   border-top-color: var(--accent);
-  border-right-color: rgba(99,102,241,0.4);
-  box-shadow: 0 0 10px rgba(99,102,241,0.3);
+  border-right-color: rgba(83,87,160,0.4);
+  box-shadow: 0 0 10px rgba(83,87,160,0.3);
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -585,11 +598,11 @@ main {
 }
 
 .step-dot.active {
-  background: var(--accent);
+  background: var(--accent-warm);
   box-shadow:
-    inset 1px 1px 2px rgba(4,6,12,0.5),
-    0 0 8px rgba(99,102,241,0.6),
-    0 0 0 2px rgba(99,102,241,0.2);
+    inset 1px 1px 2px rgba(4,6,12,0.4),
+    0 0 8px rgba(254,216,31,0.55),
+    0 0 0 2px rgba(254,216,31,0.2);
   transform: scale(1.3);
 }
 
@@ -760,17 +773,17 @@ main {
 }
 
 .compositor-toggle input:checked + .compositor-toggle-track {
-  background: rgba(99,102,241,0.15);
-  border-color: rgba(99,102,241,0.3);
+  background: rgba(254,216,31,0.12);
+  border-color: rgba(254,216,31,0.3);
 }
 
 .compositor-toggle input:checked + .compositor-toggle-track::after {
-  background: var(--accent-hover);
+  background: var(--accent-warm);
   transform: translateX(19px);
   box-shadow:
     2px 2px 6px rgba(4,6,12,0.7),
-    -1px -1px 4px rgba(255,255,255,0.1),
-    0 0 8px rgba(99,102,241,0.5);
+    -1px -1px 4px rgba(255,255,255,0.12),
+    0 0 8px rgba(254,216,31,0.45);
 }
 
 /* Font cards — raised neumorphic */
@@ -811,7 +824,7 @@ main {
 .font-card.active {
   background: var(--bg-inset);
   border-color: var(--accent-border);
-  box-shadow: var(--shadow-inset-sm), 0 0 8px rgba(99,102,241,0.15);
+  box-shadow: var(--shadow-inset-sm), 0 0 8px rgba(83,87,160,0.15);
 }
 
 .font-card.active .font-card__name { color: var(--accent-hover); }
@@ -866,8 +879,8 @@ main {
   box-shadow:
     3px 3px 8px var(--neu-dark),
     -2px -2px 5px var(--neu-light),
-    0 0 8px rgba(99,102,241,0.35);
-  border: 1px solid rgba(99,102,241,0.3);
+    0 0 8px rgba(83,87,160,0.35);
+  border: 1px solid rgba(83,87,160,0.3);
   transition: all var(--transition-fast);
 }
 
@@ -876,7 +889,7 @@ main {
   box-shadow:
     4px 4px 10px var(--neu-dark),
     -2px -2px 6px var(--neu-light),
-    0 0 14px rgba(99,102,241,0.5);
+    0 0 14px rgba(83,87,160,0.5);
 }
 
 /* Color swatches */
@@ -941,7 +954,7 @@ main {
   background: var(--bg-inset);
   border-color: var(--accent-border);
   color: var(--accent-hover);
-  box-shadow: var(--shadow-inset-sm), 0 0 6px rgba(99,102,241,0.2);
+  box-shadow: var(--shadow-inset-sm), 0 0 6px rgba(83,87,160,0.2);
 }
 
 /* Download actions */
@@ -1009,15 +1022,15 @@ main {
 
 .tags-list { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
 
-/* Tag: inset neumorphic pill */
+/* Tag: inset neumorphic pill — 佛手黄 accent */
 .tag {
   padding: 4px 11px;
   border-radius: var(--radius-badge);
   background: var(--bg-inset);
-  color: var(--accent-hover);
+  color: var(--accent-warm);
   font-size: 11px;
   font-weight: 600;
-  border: 1px solid var(--accent-dim);
+  border: 1px solid rgba(254,216,31,0.2);
   letter-spacing: 0.02em;
   box-shadow: var(--shadow-inset-sm);
 }
@@ -1174,7 +1187,7 @@ main {
 .bg-option.active {
   background: var(--bg-inset);
   border-color: var(--accent-border);
-  box-shadow: var(--shadow-inset-sm), 0 0 8px rgba(99,102,241,0.15);
+  box-shadow: var(--shadow-inset-sm), 0 0 8px rgba(83,87,160,0.15);
 }
 
 .bg-option__swatch { width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0; }
