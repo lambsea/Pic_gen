@@ -641,9 +641,30 @@
     applyFontColor('#ffffff');
     fontColorPicker.value = '#ffffff';
 
-    // Template variant — center-align for template B
-    var variant = data.layout_spec && data.layout_spec.template_variant;
-    compositorTextEl.classList.toggle('center-align', variant === 'B');
+    // Text horizontal position from Claude's layout_spec
+    var hpos = (data.layout_spec && data.layout_spec.text_x_position) || 'left';
+    applyHpos(hpos);
+
+    // Decorator
+    var decorator = (data.layout_spec && data.layout_spec.decorator) || 'none';
+    compositorTextEl.dataset.decorator = decorator;
+
+    // Title size
+    var titleSize = (data.layout_spec && data.layout_spec.title_size) || 'medium';
+    applyTitleSize(titleSize);
+
+    // Author
+    var authorVal = data.author || '';
+    if (compositorAuthorEl) {
+      compositorAuthorEl.textContent = authorVal
+        ? (authorVal.startsWith('@') ? authorVal : '@' + authorVal)
+        : '';
+    }
+
+    // Update compositor aspect ratio from platformCfg
+    if (data.platformCfg && data.platformCfg.cssRatio && compositorEl) {
+      compositorEl.style.setProperty('--platform-ratio', data.platformCfg.cssRatio);
+    }
 
     // Overlay opacity from layout_spec (default 0.45)
     var opacity = 0.45;
@@ -674,6 +695,21 @@
   function applyFontColor(hex) {
     compositorTitleEl.style.color = hex;
     compositorSubEl.style.color = hex;
+  }
+
+  function applyHpos(pos) {
+    compositorTextEl.dataset.hpos = pos;
+    if (hposBtns) {
+      var btns = hposBtns.querySelectorAll('.compositor-hpos-btn');
+      btns.forEach(function (b) {
+        b.classList.toggle('active', b.dataset.pos === pos);
+      });
+    }
+  }
+
+  function applyTitleSize(size) {
+    compositorTitleEl.classList.remove('title-large', 'title-medium', 'title-small');
+    if (size) compositorTitleEl.classList.add('title-' + size);
   }
 
   /* ----------------------------------------------------------
@@ -732,6 +768,23 @@
       });
       colorSwatchesEl.appendChild(btn);
     });
+
+    // Text visibility toggle
+    if (textVisibilityToggle) {
+      textVisibilityToggle.addEventListener('change', function () {
+        compositorTextEl.style.visibility = textVisibilityToggle.checked ? '' : 'hidden';
+      });
+    }
+
+    // H-position buttons
+    if (hposBtns) {
+      var hposBtnEls = hposBtns.querySelectorAll('.compositor-hpos-btn');
+      hposBtnEls.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          applyHpos(btn.dataset.pos);
+        });
+      });
+    }
 
     compositorDlBtn.addEventListener('click', function () {
       var titleSlug = slugify(compTitleInput.value || 'cover');
