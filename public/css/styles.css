@@ -1278,7 +1278,7 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 8% 10%;
+  padding: 5% 7%;
   z-index: 3;
 }
 
@@ -1286,24 +1286,27 @@ main {
 .cover-compositor--text-only .compositor-text[data-hpos="right"] { align-items: flex-end; text-align: right; }
 
 .cover-compositor--text-only .compositor-title {
-  font-size: clamp(1.8rem, 4.5vw, 3.4rem);
+  font-size: clamp(2.8rem, 7vw, 6rem);
   font-weight: 900;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
-.cover-compositor--text-only .compositor-title.title-large  { font-size: clamp(2.6rem, 6.5vw, 5rem); }
-.cover-compositor--text-only .compositor-title.title-medium { font-size: clamp(2rem, 5vw, 3.8rem); }
-.cover-compositor--text-only .compositor-title.title-small  { font-size: clamp(1.5rem, 3.2vw, 2.4rem); }
+/* title-large: short titles — fill the canvas aggressively */
+.cover-compositor--text-only .compositor-title.title-large  { font-size: clamp(4.5rem, 11vw, 10rem); line-height: 1.0; }
+/* title-medium: standard mid-length titles — bold & prominent */
+.cover-compositor--text-only .compositor-title.title-medium { font-size: clamp(3.2rem, 8vw, 7rem);  line-height: 1.08; }
+/* title-small: longer titles — still big, just wraps more */
+.cover-compositor--text-only .compositor-title.title-small  { font-size: clamp(2.2rem, 5.5vw, 4.5rem); line-height: 1.12; }
 
 .cover-compositor--text-only .compositor-decorator {
   display: block;
   width: 52px; height: 4px;
   background: #FFC857;
   border-radius: 2px;
-  margin-bottom: 22px;
+  margin-bottom: 16px;
   flex-shrink: 0;
 }
 

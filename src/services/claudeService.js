@@ -183,8 +183,8 @@ Return ONLY valid JSON (no markdown, no explanation) with exactly these fields:
 
 Rules:
 - highlighted_phrases: 0–2 short KEY phrases from the title that deserve visual emphasis. Be selective — highlight only the most important 1-3 words/phrase. Return empty array [] if nothing needs highlighting.
-- text_alignment: "left" for most titles, "center" for short punchy titles (≤6 words)
-- title_size: "large" if title ≤ 8 chars, "medium" if 8–18 chars, "small" if > 18 chars
+- text_alignment: "left" for most titles, "center" for short punchy titles (≤5 words)
+- title_size: "large" if title ≤ 10 chars, "medium" if 11–22 chars, "small" if > 22 chars. Err toward LARGER — the goal is bold, dominant, impactful text that fills the canvas.
 - texture_variant: pick from ["lines","dots","cross-hatch","circuit","paper"] based on topic:
   * 牛市/bull/crypto/Web3/DeFi/市场 → "lines"
   * AI/科技/tech/算法/数据 → "circuit"
