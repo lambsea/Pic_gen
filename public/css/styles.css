@@ -743,7 +743,7 @@ button {
 }
 
 .compositor-title.text-dark {
-  color: #1a202c;
+  color: var(--text-primary);
 }
 
 .compositor-subtitle {
@@ -755,7 +755,7 @@ button {
 }
 
 .compositor-subtitle.text-dark {
-  color: rgba(26, 32, 44, 0.85);
+  color: color-mix(in srgb, var(--text-primary) 85%, transparent);
 }
 
 .compositor-subtitle[hidden] {
@@ -800,7 +800,7 @@ button {
 .compositor-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  background: var(--bg-secondary);
+  background: var(--bg-input);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
@@ -813,7 +813,7 @@ button {
 .compositor-input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 59,130,246), 0.15);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 /* --- Font selector --- */
@@ -848,7 +848,7 @@ button {
   justify-content: center;
   padding: 0.5rem 0.75rem;
   min-width: 80px;
-  background: var(--bg-secondary);
+  background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -864,7 +864,7 @@ button {
 
 .font-card.active {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, var(--bg-secondary));
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-card));
 }
 
 .font-card__name {
