@@ -4,18 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Twitter Cover Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="ambient-blob ambient-blob--1"></div>
+    <div class="ambient-blob ambient-blob--2"></div>
+    <div class="ambient-blob ambient-blob--3"></div>
+  </div>
   <div class="page-wrapper">
     <header class="site-header">
       <div class="header-inner">
-        <div class="logo-mark" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="24" height="24" rx="6" fill="var(--accent)"/>
-            <path d="M5 7h14M5 12h9M5 17h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
+          <div class="logo-mark" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 5h14M2 9h9M2 13h6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="14" cy="13" r="2.5" stroke="#fff" stroke-width="1.5"/>
+            </svg>
+          </div>
         <div>
           <h1 class="site-title">Twitter Cover Generator</h1>
           <p class="site-subtitle">AI-powered article cover images in seconds</p>
@@ -415,7 +423,7 @@
     </main>
 
     <footer class="site-footer">
-      <p>Powered by Claude Sonnet &amp; Recraft V4</p>
+      <p>Powered by <span class="footer-brand">Claude</span> &amp; <span class="footer-brand">Recraft</span></p>
     </footer>
   </div>
 
