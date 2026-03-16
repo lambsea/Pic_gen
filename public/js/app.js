@@ -58,12 +58,34 @@
   var toast            = document.getElementById('copy-toast');
 
   /* ----------------------------------------------------------
+     Compositor DOM References
+  ---------------------------------------------------------- */
+  var compositorEl       = document.getElementById('cover-compositor');
+  var compositorImg      = document.getElementById('compositor-base-image');
+  var compositorOverlay  = document.getElementById('compositor-overlay');
+  var compositorTextEl   = document.getElementById('compositor-text');
+  var compositorTitleEl  = document.getElementById('compositor-title');
+  var compositorSubEl    = document.getElementById('compositor-subtitle');
+
+  var compTitleInput     = document.getElementById('compositor-title-input');
+  var compSubtitleInput  = document.getElementById('compositor-subtitle-input');
+  var subtitleToggle     = document.getElementById('compositor-subtitle-toggle');
+  var opacitySlider      = document.getElementById('compositor-opacity');
+  var opacityValueEl     = document.getElementById('compositor-opacity-value');
+  var fontCardsEn        = document.getElementById('font-cards-en');
+  var fontCardsZh        = document.getElementById('font-cards-zh');
+  var compositorDlBtn    = document.getElementById('compositor-download-btn');
+  var downloadOriginalBtn = document.getElementById('download-original-btn');
+
+  /* ----------------------------------------------------------
      State
   ---------------------------------------------------------- */
   var currentState   = 'form';
   var loadingTimerId = null;
   var toastTimerId   = null;
   var msgIndex       = 0;
+  var currentFontId  = null;
+  var fontsConfig    = [];   // array of font objects from /api/fonts-config
 
   /* ----------------------------------------------------------
      State Machine
@@ -285,6 +307,8 @@
     specToggle.setAttribute('aria-expanded', 'false');
     specContent.hidden = true;
 
+    initCompositor(data);
+
     setState('result');
   }
 
@@ -387,9 +411,208 @@
   }
 
   /* ----------------------------------------------------------
+     Font Loading
+  ---------------------------------------------------------- */
+  function loadFonts() {
+    fetch('/api/fonts')
+      .then(function (res) { return res.text(); })
+      .then(function (css) {
+        if (!css) return;
+        var style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+      })
+      .catch(function () { /* fonts unavailable — degrade gracefully */ });
+
+    fetch('/api/fonts-config')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        fontsConfig = Array.isArray(data) ? data : [];
+        buildFontCards();
+      })
+      .catch(function () { fontsConfig = []; });
+  }
+
+  /* ----------------------------------------------------------
+     Font Cards
+  ---------------------------------------------------------- */
+  function buildFontCards() {
+    var enFonts = fontsConfig.filter(function (f) { return f.language === 'en'; });
+    var zhFonts = fontsConfig.filter(function (f) { return f.language === 'zh'; });
+
+    renderFontGroup(enFonts, fontCardsEn);
+    renderFontGroup(zhFonts, fontCardsZh);
+  }
+
+  function renderFontGroup(fonts, container) {
+    if (!container) return;
+    clearChildren(container);
+    fonts.forEach(function (font) {
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'font-card';
+      card.dataset.fontId = font.id;
+      card.setAttribute('aria-label', font.name + ' font');
+
+      var nameEl = document.createElement('span');
+      nameEl.className = 'font-card__name';
+      nameEl.textContent = font.name;
+      nameEl.style.fontFamily = "'" + font.family + "', sans-serif";
+
+      var labelEl = document.createElement('span');
+      labelEl.className = 'font-card__label';
+      labelEl.textContent = font.label;
+
+      card.appendChild(nameEl);
+      card.appendChild(labelEl);
+      card.addEventListener('click', function () { selectFont(font); });
+      container.appendChild(card);
+    });
+  }
+
+  function selectFont(font) {
+    currentFontId = font.id;
+    // Update active card highlight
+    var allCards = document.querySelectorAll('.font-card');
+    allCards.forEach(function (c) {
+      c.classList.toggle('active', c.dataset.fontId === font.id);
+    });
+    // Apply font to compositor text
+    var fontStack = "'" + font.family + "', sans-serif";
+    compositorTitleEl.style.fontFamily = fontStack;
+    compositorSubEl.style.fontFamily = fontStack;
+  }
+
+  /* ----------------------------------------------------------
+     Compositor Initialization
+  ---------------------------------------------------------- */
+  function initCompositor(data) {
+    // Set image — proxy if it's a remote URL
+    var imageUrl = data.imageUrl || '';
+    if (imageUrl.startsWith('http')) {
+      imageUrl = '/api/proxy-image?url=' + encodeURIComponent(imageUrl);
+    }
+    compositorImg.src = imageUrl;
+    compositorImg.alt = data.cover_title || 'Cover image';
+
+    // Populate text from API data
+    compTitleInput.value = data.cover_title || '';
+    compSubtitleInput.value = data.subtitle || '';
+    compositorTitleEl.textContent = data.cover_title || '';
+    compositorSubEl.textContent = data.subtitle || '';
+
+    // Subtitle visibility
+    var hasSubtitle = !!data.subtitle;
+    subtitleToggle.checked = hasSubtitle;
+    compositorSubEl.hidden = !hasSubtitle;
+
+    // Text color based on color_scheme
+    var isDark = (data.color_scheme || 'dark').toLowerCase() !== 'light';
+    compositorTitleEl.classList.toggle('text-dark', !isDark);
+    compositorSubEl.classList.toggle('text-dark', !isDark);
+
+    // Template variant — center-align for template B
+    var variant = data.layout_spec && data.layout_spec.template_variant;
+    compositorTextEl.classList.toggle('center-align', variant === 'B');
+
+    // Overlay opacity from layout_spec (default 0.45)
+    var opacity = 0.45;
+    if (data.layout_spec && typeof data.layout_spec.overlay_opacity === 'number') {
+      opacity = data.layout_spec.overlay_opacity;
+    }
+    opacitySlider.value = opacity;
+    updateOverlayOpacity(opacity);
+
+    // Hide old image wrap, show compositor
+    var oldWrap = document.querySelector('.result-image-wrap');
+    if (oldWrap) oldWrap.classList.add('compositor-active');
+
+    // Auto-select default font based on detected_language
+    if (fontsConfig.length > 0) {
+      var lang = (data.detected_language || 'en').toLowerCase();
+      var defaultFont = fontsConfig.find(function (f) { return f.language === lang; });
+      if (!defaultFont) defaultFont = fontsConfig[0];
+      if (defaultFont) selectFont(defaultFont);
+    }
+
+    // Wire download original button
+    downloadOriginalBtn.href = data.imageUrl || '#';
+    downloadOriginalBtn.download = slugify(data.cover_title || 'cover') + '.jpg';
+  }
+
+  function updateOverlayOpacity(value) {
+    compositorOverlay.style.setProperty('--overlay-opacity', value);
+    opacityValueEl.textContent = Math.round(value * 100) + '%';
+  }
+
+  /* ----------------------------------------------------------
+     Live Preview Listeners
+  ---------------------------------------------------------- */
+  function initCompositorListeners() {
+    compTitleInput.addEventListener('input', function () {
+      compositorTitleEl.textContent = compTitleInput.value;
+    });
+
+    compSubtitleInput.addEventListener('input', function () {
+      compositorSubEl.textContent = compSubtitleInput.value;
+    });
+
+    subtitleToggle.addEventListener('change', function () {
+      compositorSubEl.hidden = !subtitleToggle.checked;
+    });
+
+    opacitySlider.addEventListener('input', function () {
+      updateOverlayOpacity(parseFloat(opacitySlider.value));
+    });
+
+    compositorDlBtn.addEventListener('click', function () {
+      var titleSlug = slugify(compTitleInput.value || 'cover');
+      downloadComposited(titleSlug);
+    });
+  }
+
+  /* ----------------------------------------------------------
+     html2canvas Export
+  ---------------------------------------------------------- */
+  function downloadComposited(titleSlug) {
+    if (typeof html2canvas === 'undefined') {
+      showToast('html2canvas not loaded — please refresh.');
+      return;
+    }
+    compositorDlBtn.classList.add('is-loading');
+    compositorDlBtn.disabled = true;
+
+    document.fonts.ready.then(function () {
+      return html2canvas(compositorEl, {
+        scale: 2,
+        useCORS: false,
+        allowTaint: false,
+        logging: false,
+        backgroundColor: null
+      });
+    }).then(function (canvas) {
+      canvas.toBlob(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'cover-' + titleSlug + '.jpg';
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.95);
+    }).catch(function (err) {
+      showToast('Export failed: ' + (err && err.message ? err.message : 'unknown error'));
+    }).finally(function () {
+      compositorDlBtn.classList.remove('is-loading');
+      compositorDlBtn.disabled = false;
+    });
+  }
+
+  /* ----------------------------------------------------------
      Init — form section is active by default via HTML class,
      call setState to register currentState correctly.
   ---------------------------------------------------------- */
+  loadFonts();
+  initCompositorListeners();
   currentState = 'loading'; // trick setState into running for 'form'
   setState('form');
 
