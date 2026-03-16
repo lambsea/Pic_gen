@@ -86,6 +86,7 @@
   var msgIndex       = 0;
   var fontsConfig       = [];   // array of font objects from /api/fonts-config
   var pendingDefaultLang = null;
+  var selectedStyleId = null;
 
   /* ----------------------------------------------------------
      State Machine
@@ -180,7 +181,7 @@
     var category          = categoryInput.value.trim();
     var language_override = langSelect.value;
 
-    generateCover({ title: title, url: url, category: category, language_override: language_override });
+    generateCover({ title: title, url: url, category: category, language_override: language_override, style_id: selectedStyleId });
   });
 
   titleInput.addEventListener('input', function () {
@@ -411,6 +412,50 @@
   }
 
   /* ----------------------------------------------------------
+     Style Selector
+  ---------------------------------------------------------- */
+  function loadStyleSelector() {
+    fetch('/api/recraft-styles')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var styles = Array.isArray(data.styles) ? data.styles : [];
+        if (styles.length === 0) return; // no styles configured — hide selector
+
+        selectedStyleId = data.default || (styles[0] && styles[0].id) || null;
+
+        var container = document.getElementById('style-cards');
+        var fieldGroup = document.getElementById('style-field-group');
+        if (!container || !fieldGroup) return;
+
+        clearChildren(container);
+        styles.forEach(function (style) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'style-card' + (style.id === selectedStyleId ? ' active' : '');
+          btn.dataset.styleId = style.id;
+          btn.setAttribute('aria-label', 'Select ' + style.name);
+
+          var nameEl = document.createElement('span');
+          nameEl.className = 'style-card__name';
+          nameEl.textContent = style.note || style.name;
+
+          btn.appendChild(nameEl);
+          btn.addEventListener('click', function () {
+            selectedStyleId = style.id;
+            var allCards = document.querySelectorAll('.style-card');
+            allCards.forEach(function (c) {
+              c.classList.toggle('active', c.dataset.styleId === style.id);
+            });
+          });
+          container.appendChild(btn);
+        });
+
+        fieldGroup.style.display = '';
+      })
+      .catch(function () { /* styles unavailable — degrade gracefully */ });
+  }
+
+  /* ----------------------------------------------------------
      Font Loading
   ---------------------------------------------------------- */
   function loadFonts() {
@@ -621,6 +666,7 @@
      call setState to register currentState correctly.
   ---------------------------------------------------------- */
   loadFonts();
+  loadStyleSelector();
   initCompositorListeners();
   currentState = 'loading'; // trick setState into running for 'form'
   setState('form');

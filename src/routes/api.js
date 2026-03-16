@@ -94,11 +94,11 @@ router.get('/health', (req, res) => {
 // POST /api/generate
 // -----------------------------------------------
 router.post('/generate', async (req, res, next) => {
-  const { title, url, category, language_override } = req.body || {};
+  const { title, url, category, language_override, style_id } = req.body || {};
   const jobId = uuidv4();
   req.jobId = jobId; // attach for error handler logging
 
-  logger.info('Generation request received', { jobId, title, url, category, language_override });
+  logger.info('Generation request received', { jobId, title, url, category, language_override, style_id });
 
   // --- Input Validation ---
   if (!title || typeof title !== 'string' || title.trim().length === 0) {
@@ -148,7 +148,7 @@ router.post('/generate', async (req, res, next) => {
   // --- Recraft: Generate Image ---
   let imageResult;
   try {
-    imageResult = await recraftService.generateImage(claudeOutput.image_prompt);
+    imageResult = await recraftService.generateImage(claudeOutput.image_prompt, 0, style_id || null);
   } catch (err) {
     return next(err);
   }
@@ -164,13 +164,15 @@ router.post('/generate', async (req, res, next) => {
     ...claudeOutput,
     imageUrl,
     imageRemoteUrl: imageResult.remoteUrl,
+    style_id: style_id || null,
     generatedAt: new Date().toISOString(),
     mode,
     input: {
       title: cleanTitle,
       url: url || null,
       category: category || null,
-      language_override: language_override || null
+      language_override: language_override || null,
+      style_id: style_id || null
     }
   };
 
@@ -257,6 +259,20 @@ router.get('/fonts-config', (req, res) => {
 
   res.set('Cache-Control', 'public, max-age=3600');
   res.status(200).json(validFonts);
+});
+
+// -----------------------------------------------
+// GET /api/recraft-styles
+// -----------------------------------------------
+router.get('/recraft-styles', (req, res) => {
+  try {
+    const stylesPath = path.resolve(process.cwd(), 'data', 'recraft_styles.json');
+    const data = JSON.parse(fs.readFileSync(stylesPath, 'utf8'));
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.json(data);
+  } catch (err) {
+    res.json({ styles: [], default: null });
+  }
 });
 
 // -----------------------------------------------

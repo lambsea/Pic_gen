@@ -1012,3 +1012,40 @@ button {
 .result-image-wrap.compositor-active {
   display: none;
 }
+
+/* ==================== STYLE SELECTOR ==================== */
+
+.style-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.style-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.9rem;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.style-card:hover {
+  border-color: var(--accent);
+}
+
+.style-card.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-input));
+  font-weight: 600;
+}
+
+.style-card__name {
+  white-space: nowrap;
+}

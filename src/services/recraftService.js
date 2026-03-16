@@ -32,16 +32,19 @@ function ensureOutputsDir() {
  * Generate an image with Recraft V4 and save it locally.
  * @param {string} imagePrompt
  * @param {number} retryCount
+ * @param {string|null} styleIdOverride - optional style_id that overrides RECRAFT_STYLE_ID env var
  * @returns {Promise<{ remoteUrl: string, localFilename: string, localPath: string }>}
  * @throws {RecraftAPIError} after max retries
  */
-async function generateImage(imagePrompt, retryCount = 0) {
+async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null) {
   const apiKey = process.env.RECRAFT_API_KEY;
   if (!apiKey) {
     throw new RecraftAPIError('RECRAFT_API_KEY environment variable is not set');
   }
 
-  logger.info('Calling Recraft API', { model: RECRAFT_MODEL, attempt: retryCount, promptLength: imagePrompt.length });
+  const effectiveStyleId = styleIdOverride || RECRAFT_STYLE_ID;
+
+  logger.info('Calling Recraft API', { model: RECRAFT_MODEL, attempt: retryCount, promptLength: imagePrompt.length, styleId: effectiveStyleId });
 
   let remoteUrl;
   try {
@@ -54,7 +57,7 @@ async function generateImage(imagePrompt, retryCount = 0) {
         width: IMAGE_WIDTH,
         height: IMAGE_HEIGHT,
         response_format: 'url',
-        ...(RECRAFT_STYLE_ID && { style_id: RECRAFT_STYLE_ID })
+        ...(effectiveStyleId && { style_id: effectiveStyleId })
       },
       {
         headers: {
@@ -78,7 +81,7 @@ async function generateImage(imagePrompt, retryCount = 0) {
       const delay = RETRY_BASE_DELAY_MS * Math.pow(2, retryCount);
       logger.info(`Retrying Recraft in ${delay}ms`, { nextAttempt: retryCount + 1 });
       await sleep(delay);
-      return generateImage(imagePrompt, retryCount + 1);
+      return generateImage(imagePrompt, retryCount + 1, styleIdOverride);
     }
 
     throw new RecraftAPIError(`Recraft API failed after ${retryCount + 1} attempts: ${errMsg}`);
