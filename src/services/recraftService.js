@@ -14,6 +14,7 @@ const IMAGE_HEIGHT = parseInt(process.env.RECRAFT_IMAGE_HEIGHT || '675');
 const MAX_RETRIES = parseInt(process.env.RECRAFT_MAX_RETRIES || '2');
 const RETRY_BASE_DELAY_MS = parseInt(process.env.RECRAFT_RETRY_BASE_DELAY_MS || '1000');
 const OUTPUTS_DIR = process.env.OUTPUTS_DIR || './outputs';
+const RECRAFT_STYLE_ID = process.env.RECRAFT_STYLE_ID || null;
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -52,7 +53,8 @@ async function generateImage(imagePrompt, retryCount = 0) {
         n: 1,
         width: IMAGE_WIDTH,
         height: IMAGE_HEIGHT,
-        response_format: 'url'
+        response_format: 'url',
+        ...(RECRAFT_STYLE_ID && { style_id: RECRAFT_STYLE_ID })
       },
       {
         headers: {

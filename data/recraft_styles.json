@@ -1,0 +1,10 @@
+{
+  "styles": [
+    { "id": "b353ca48-e2f3-481e-8e9d-f8fda2f00748", "name": "Style 1", "note": "" },
+    { "id": "df07403d-2df1-4d3f-aa23-35a3f7cd4528", "name": "Style 2", "note": "" },
+    { "id": "1da9391c-2b94-423c-ac1e-774906147b3d", "name": "Style 3", "note": "" },
+    { "id": "a259b119-77db-472d-9c46-6d451c437f11", "name": "Style 4", "note": "" },
+    { "id": "9fe58390-9230-4ce0-bf98-ea36c005c1e1", "name": "Style 5", "note": "" }
+  ],
+  "default": "b353ca48-e2f3-481e-8e9d-f8fda2f00748"
+}
