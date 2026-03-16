@@ -74,7 +74,10 @@
         "title_alignment",
         "safe_text_area",
         "logo_position",
-        "overlay_opacity"
+        "overlay_opacity",
+        "text_x_position",
+        "decorator",
+        "title_size"
       ],
       "properties": {
         "template_variant": {
@@ -101,6 +104,21 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Opacity of dark/light overlay for text readability (0.3–0.7 recommended)"
+        },
+        "text_x_position": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "description": "Horizontal anchor of text block: left = left-heavy image, right = right-heavy image, center = symmetric image"
+        },
+        "decorator": {
+          "type": "string",
+          "enum": ["line", "dots", "bracket", "none"],
+          "description": "Decorative accent: line = horizontal rule above title, dots = three-dot motif, bracket = corner brackets, none = clean"
+        },
+        "title_size": {
+          "type": "string",
+          "enum": ["large", "medium", "small"],
+          "description": "Suggested title size: large = short title (ZH ≤8 chars or EN ≤20 chars), medium = medium title, small = long title"
         }
       },
       "additionalProperties": false

@@ -20,35 +20,52 @@ ARTICLE CONTENT:
 ---
 
 TASK:
-Analyze the article and produce a Twitter cover image design specification as JSON.
+Analyze the article and produce a cover image design specification as JSON.
 
 RULES:
-1. detected_language: Detect from article content. Use "zh" if the title or content is primarily Chinese characters. Use "en" if primarily English. If language_override is provided (not "none"), use that value.
 
-2. color_scheme: MUST match detected_language. "dark" for "en", "light" for "zh". This is the rule: English articles get dark backgrounds, Chinese articles get light backgrounds.
+1. detected_language: Detect from article content. Use "zh" if title/content is primarily Chinese. Use "en" if primarily English. If language_override is provided (not "none"), use that value.
 
-3. cover_title: A compelling, concise title for the cover. NOT necessarily the same as the article title — improve it for visual impact. Max 60 English characters or 20 Chinese characters.
+2. color_scheme: MUST match detected_language. "dark" for "en", "light" for "zh". English articles → dark backgrounds. Chinese articles → light/clean backgrounds.
 
-4. image_prompt: A detailed, vivid prompt for Recraft V4 image generation. MUST:
+3. cover_title: A compelling, concise cover title for visual impact. NOT necessarily the article title. Max 20 Chinese characters or 50 English characters.
+
+4. image_prompt: A vivid, detailed prompt for Recraft image generation — visual elements ONLY. MUST:
    - Be at least 80 words
-   - Describe ONLY visual elements: subject, lighting, mood, composition, colors, style
-   - Include: one strong central visual metaphor relevant to the article topic
-   - Include: cinematic lighting description
-   - Include: "strong negative space in the lower portion of the image, suitable for text overlay"
+   - Describe ONLY: subject, lighting, mood, composition, color palette, texture, style
+   - Include ONE strong central visual metaphor tied to the article topic
+   - Include cinematic lighting (golden hour / neon glow / overcast diffuse / etc.)
+   - Include "strong negative space in the lower 40% of the image for text overlay"
+   - Describe compositional bias matching text_x_position: if text will be left-aligned, leave open negative space on the LEFT side; if right-aligned, leave space on the RIGHT; if centered, keep center clear
    - MUST NOT contain: text, typography, letters, words, logos, brand names, watermarks
-   - For dark (English) covers: deep dark background (#0A0A0A), neon accent tones, high contrast
-   - For light (Chinese) covers: clean bright background, muted professional tones, editorial feel
+   - dark scheme: deep shadows, high contrast, dramatic mood; accent colors: electric blue, mint, amber
+   - light scheme: clean bright tones, airy composition, muted professional palette
 
-5. negative_prompt: List elements to avoid. Always include: "text, words, letters, typography, watermark, logo, cluttered background, multiple competing subjects, generic stock photo aesthetic"
+5. negative_prompt: Elements to explicitly avoid. Always include: "text, words, letters, typography, watermark, logo, cluttered composition, multiple competing focal points, generic stock photo aesthetic, human faces"
 
-6. layout_spec.template_variant: Choose based on content type:
-   - A: General editorial, thought leadership, trend analysis
-   - B: Data-heavy, research, statistics, technical deep dives
-   - C: Opinion, commentary, hot takes, debate topics
+6. layout_spec.template_variant:
+   - A: Thought leadership, trends, editorial
+   - B: Data, research, technical analysis
+   - C: Opinion, hot takes, debate
 
-7. layout_spec.overlay_opacity: How much to darken/lighten the image for text readability. Use 0.3 for subtle, 0.5 for medium, 0.65 for strong. Dark covers use dark overlay, light covers use light overlay.
+7. layout_spec.overlay_opacity: 0.3 = subtle, 0.5 = medium, 0.65 = strong. Increase if image is busy; decrease if image has natural negative space.
 
-8. brand_checklist: List 3–5 specific brand rules this design follows from the brand brief.
+8. layout_spec.text_x_position: Choose based on planned image composition:
+   - "left": main subject on RIGHT side, negative space on left → text anchors left
+   - "right": main subject on LEFT side, negative space on right → text anchors right
+   - "center": symmetric or abstract composition → text centered
+
+9. layout_spec.decorator: Choose based on article tone:
+   - "line": clean horizontal rule — professional default, works for all types
+   - "dots": three dot motif — editorial, magazine feel
+   - "bracket": corner brackets — tech/data heavy content
+   - "none": very short bold title (large size), no decoration needed
+
+10. layout_spec.title_size: Based on cover_title character count:
+    - Chinese: "large" ≤8 chars, "medium" 9–15 chars, "small" >15 chars
+    - English: "large" ≤20 chars, "medium" 21–40 chars, "small" >40 chars
+
+11. brand_checklist: 3–5 specific brand rules confirmed for this design.
 
 OUTPUT SCHEMA:
 {{OUTPUT_SCHEMA_JSON}}
