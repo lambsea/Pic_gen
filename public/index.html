@@ -118,6 +118,16 @@
 
       <!-- Result Section -->
       <section id="result-section" class="section" aria-label="Generated cover result" hidden>
+        <!-- Text Compositor Preview -->
+        <div class="cover-compositor" id="cover-compositor">
+          <img class="compositor-base-image" id="compositor-base-image" src="" alt="">
+          <div class="compositor-overlay" id="compositor-overlay"></div>
+          <div class="compositor-text" id="compositor-text">
+            <div class="compositor-title" id="compositor-title"></div>
+            <div class="compositor-subtitle" id="compositor-subtitle"></div>
+          </div>
+        </div>
+
         <div class="result-image-wrap">
           <img
             id="result-image"
@@ -126,6 +136,84 @@
             alt="Generated article cover"
             loading="eager"
           >
+        </div>
+
+        <!-- Text Compositor Controls -->
+        <div class="compositor-controls card" id="compositor-controls">
+
+          <!-- Title input -->
+          <div class="compositor-field">
+            <label class="compositor-label" for="compositor-title-input">Title</label>
+            <input type="text" id="compositor-title-input" class="compositor-input" autocomplete="off">
+          </div>
+
+          <!-- Subtitle input + toggle -->
+          <div class="compositor-field compositor-field--row">
+            <div class="compositor-field-grow">
+              <label class="compositor-label" for="compositor-subtitle-input">Subtitle</label>
+              <input type="text" id="compositor-subtitle-input" class="compositor-input" autocomplete="off">
+            </div>
+            <label class="compositor-toggle" aria-label="Show subtitle">
+              <input type="checkbox" id="compositor-subtitle-toggle" checked>
+              <span class="compositor-toggle-track"></span>
+            </label>
+          </div>
+
+          <!-- Font selector -->
+          <div class="compositor-field">
+            <div class="compositor-label">Font</div>
+            <div class="compositor-fonts">
+              <div class="compositor-fonts-group">
+                <div class="compositor-fonts-label">English</div>
+                <div class="compositor-font-cards" id="font-cards-en"></div>
+              </div>
+              <div class="compositor-fonts-group">
+                <div class="compositor-fonts-label">中文</div>
+                <div class="compositor-font-cards" id="font-cards-zh"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overlay opacity slider -->
+          <div class="compositor-field">
+            <div class="compositor-field--row compositor-opacity-row">
+              <span class="compositor-label">Overlay</span>
+              <span class="compositor-opacity-label" aria-hidden="true">Light</span>
+              <input
+                type="range"
+                id="compositor-opacity"
+                class="compositor-slider"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.45"
+                aria-label="Overlay opacity"
+              >
+              <span class="compositor-opacity-label" aria-hidden="true">Dark</span>
+              <span class="compositor-opacity-value" id="compositor-opacity-value" aria-live="polite">45%</span>
+            </div>
+          </div>
+
+          <!-- Download actions -->
+          <div class="compositor-actions">
+            <button id="compositor-download-btn" class="btn btn-primary" type="button">
+              <span class="btn-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 2v8M5 7l3 3 3-3M2 12v.5A1.5 1.5 0 003.5 14h9a1.5 1.5 0 001.5-1.5V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Download with Text
+            </button>
+            <a id="download-original-btn" class="btn btn-secondary" href="#" download role="button" aria-label="Download original image without text">
+              <span class="btn-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 2v8M5 7l3 3 3-3M2 12v.5A1.5 1.5 0 003.5 14h9a1.5 1.5 0 001.5-1.5V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Original
+            </a>
+          </div>
+
         </div>
 
         <div class="card result-card">
@@ -222,6 +310,7 @@
     Copied to clipboard!
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
