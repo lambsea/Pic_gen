@@ -1326,16 +1326,114 @@ button {
 }
 
 /* ============================================================
-   Text Highlight Span
+   Text Highlight — Block fill (marker style)
    ============================================================ */
 .text-highlight {
   font-style: normal;
-  color: #FFC857;
+  display: inline;
+  background: #FFC857;
+  color: #0A0A0A;
+  padding: 0.05em 0.25em 0.1em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 2px;
 }
 
-/* On light background, use a deeper amber for contrast */
+/* Light background: deeper amber for contrast */
 .cover-compositor--text-only[data-text-bg="light"] .text-highlight {
-  color: #D97706;
+  background: #D97706;
+  color: #FFFFFF;
+}
+
+/* ============================================================
+   Texture Layer
+   ============================================================ */
+.compositor-texture-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+}
+
+.cover-compositor--text-only .compositor-texture-layer {
+  opacity: 1;
+}
+
+/* Lines (diagonal, subtle) */
+.compositor-texture-layer.texture-lines {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 10px,
+    rgba(128,128,128,0.055) 10px,
+    rgba(128,128,128,0.055) 11px
+  );
+}
+
+/* Dots grid */
+.compositor-texture-layer.texture-dots {
+  background-image: radial-gradient(circle, rgba(128,128,128,0.12) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Cross-hatch */
+.compositor-texture-layer.texture-cross-hatch {
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0, transparent 9px, rgba(128,128,128,0.05) 9px, rgba(128,128,128,0.05) 10px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 9px, rgba(128,128,128,0.05) 9px, rgba(128,128,128,0.05) 10px);
+}
+
+/* Circuit — fine horizontal + vertical micro-grid */
+.compositor-texture-layer.texture-circuit {
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 23px, rgba(128,128,128,0.06) 23px, rgba(128,128,128,0.06) 24px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 23px, rgba(128,128,128,0.06) 23px, rgba(128,128,128,0.06) 24px);
+}
+
+/* Paper — very fine diagonal grain */
+.compositor-texture-layer.texture-paper {
+  background-image: repeating-linear-gradient(
+    -60deg,
+    transparent 0px,
+    transparent 4px,
+    rgba(128,128,128,0.025) 4px,
+    rgba(128,128,128,0.025) 5px
+  );
+}
+
+/* On light background, flip to dark-on-light */
+.compositor-texture-layer[data-bg="light"].texture-lines {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 10px,
+    rgba(0,0,0,0.04) 10px,
+    rgba(0,0,0,0.04) 11px
+  );
+}
+.compositor-texture-layer[data-bg="light"].texture-dots {
+  background-image: radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.compositor-texture-layer[data-bg="light"].texture-cross-hatch {
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0, transparent 9px, rgba(0,0,0,0.03) 9px, rgba(0,0,0,0.03) 10px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 9px, rgba(0,0,0,0.03) 9px, rgba(0,0,0,0.03) 10px);
+}
+.compositor-texture-layer[data-bg="light"].texture-circuit {
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0, transparent 23px, rgba(0,0,0,0.04) 23px, rgba(0,0,0,0.04) 24px),
+    repeating-linear-gradient(90deg, transparent 0, transparent 23px, rgba(0,0,0,0.04) 23px, rgba(0,0,0,0.04) 24px);
+}
+.compositor-texture-layer[data-bg="light"].texture-paper {
+  background-image: repeating-linear-gradient(
+    -60deg,
+    transparent 0px,
+    transparent 4px,
+    rgba(0,0,0,0.02) 4px,
+    rgba(0,0,0,0.02) 5px
+  );
 }
 
 /* ============================================================
@@ -1345,6 +1443,26 @@ button {
   background: var(--solid-bg, #0A0A0A);
 }
 
+/* L-shaped decorative border — top + left edges, ystrategy style */
+.cover-compositor--text-only::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 5;
+  border-top: 2px solid rgba(255,198,87,0.6);
+  border-left: 2px solid rgba(255,198,87,0.6);
+}
+
+.cover-compositor--text-only[data-text-bg="light"]::after {
+  border-top-color: rgba(180,120,0,0.4);
+  border-left-color: rgba(180,120,0,0.4);
+}
+
+/* Text block: vertically centered, left-aligned by default */
 .cover-compositor--text-only .compositor-text {
   position: absolute;
   inset: 0;
@@ -1352,7 +1470,8 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 8% 10%;
+  padding: 8% 10% 8% 10%;
+  z-index: 3;
 }
 
 .cover-compositor--text-only .compositor-text[data-hpos="center"] {
@@ -1365,31 +1484,49 @@ button {
   text-align: right;
 }
 
+/* Title typography — ultra-bold dominant */
 .cover-compositor--text-only .compositor-title {
-  font-size: clamp(1.8rem, 4.5vw, 3.2rem);
-  font-weight: 700;
-  line-height: 1.25;
+  font-size: clamp(1.8rem, 4.5vw, 3.4rem);
+  font-weight: 900;
+  line-height: 1.2;
   letter-spacing: -0.02em;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .cover-compositor--text-only .compositor-title.title-large {
-  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-size: clamp(2.6rem, 6.5vw, 5rem);
+}
+
+.cover-compositor--text-only .compositor-title.title-medium {
+  font-size: clamp(2rem, 5vw, 3.8rem);
 }
 
 .cover-compositor--text-only .compositor-title.title-small {
-  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-size: clamp(1.5rem, 3.2vw, 2.4rem);
 }
 
-/* Decorator line above title in text-only mode */
+/* Decorator: thick accent line above title */
 .cover-compositor--text-only .compositor-decorator {
   display: block;
-  width: 48px;
-  height: 3px;
+  width: 52px;
+  height: 4px;
   background: #FFC857;
   border-radius: 2px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+  flex-shrink: 0;
 }
 
 .cover-compositor--text-only[data-text-bg="light"] .compositor-decorator {
   background: #D97706;
+}
+
+/* Author: bottom of text block */
+.cover-compositor--text-only .compositor-author {
+  margin-top: 20px;
+  font-size: clamp(0.75rem, 1.4vw, 1rem);
+  font-weight: 500;
+  opacity: 0.65;
+  letter-spacing: 0.04em;
+  font-family: var(--font-mono);
 }

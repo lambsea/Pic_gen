@@ -324,4 +324,22 @@ router.get('/proxy-image', async (req, res) => {
   }
 });
 
+// -----------------------------------------------
+// POST /api/text-cover-layout
+// Lightweight Claude call for text-only cover layout
+// -----------------------------------------------
+router.post('/text-cover-layout', async (req, res, next) => {
+  const { title, bg } = req.body;
+  if (!title || typeof title !== 'string' || !title.trim()) {
+    return res.status(400).json({ error: { code: 'MISSING_TITLE', message: 'title is required' } });
+  }
+  const bgVariant = (bg === 'light') ? 'light' : 'dark';
+  try {
+    const layout = await claudeService.generateTextLayout(title.trim(), bgVariant);
+    return res.json(layout);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

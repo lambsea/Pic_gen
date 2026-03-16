@@ -160,4 +160,65 @@ async function generateDesignJSON({ title, articleText, category, language_overr
   throw new ClaudeJSONError(`Claude JSON generation failed after ${CLAUDE_MAX_RETRIES + 1} attempts`);
 }
 
-module.exports = { generateDesignJSON };
+/**
+ * Lightweight Claude call for text-only cover layout decisions.
+ * Uses haiku model for speed/cost. Returns layout JSON.
+ */
+async function generateTextLayout(title, bgVariant) {
+  const client = getClient();
+  const model = process.env.CLAUDE_HAIKU_MODEL || 'claude-haiku-4-5';
+
+  const prompt = `You are a typography layout designer for social media covers. Analyze this title and return a JSON layout plan.
+
+Title: "${title}"
+Background: ${bgVariant} (dark = near-black #0A0A0A, light = off-white #F5F7FA)
+
+Return ONLY valid JSON (no markdown, no explanation) with exactly these fields:
+{
+  "highlighted_phrases": ["phrase1", "phrase2"],
+  "text_alignment": "left",
+  "title_size": "large",
+  "texture_variant": "lines"
+}
+
+Rules:
+- highlighted_phrases: 0–2 short KEY phrases from the title that deserve visual emphasis. Be selective — highlight only the most important 1-3 words/phrase. Return empty array [] if nothing needs highlighting.
+- text_alignment: "left" for most titles, "center" for short punchy titles (≤6 words)
+- title_size: "large" if title ≤ 8 chars, "medium" if 8–18 chars, "small" if > 18 chars
+- texture_variant: pick from ["lines","dots","cross-hatch","circuit","paper"] based on topic:
+  * 牛市/bull/crypto/Web3/DeFi/市场 → "lines"
+  * AI/科技/tech/算法/数据 → "circuit"
+  * 监管/regulation/政策/policy → "cross-hatch"
+  * 品牌/brand/设计/marketing → "dots"
+  * anything else → "paper"`;
+
+  const MAX_RETRIES = 2;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await client.messages.create({
+        model,
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }]
+      });
+      const raw = response.content[0]?.text || '';
+      // Strip markdown fences if present
+      const cleaned = raw.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
+      // Validate fields
+      return {
+        highlighted_phrases: Array.isArray(parsed.highlighted_phrases) ? parsed.highlighted_phrases : [],
+        text_alignment: ['left', 'center', 'right'].includes(parsed.text_alignment) ? parsed.text_alignment : 'left',
+        title_size: ['large', 'medium', 'small'].includes(parsed.title_size) ? parsed.title_size : 'medium',
+        texture_variant: ['lines', 'dots', 'cross-hatch', 'circuit', 'paper'].includes(parsed.texture_variant) ? parsed.texture_variant : 'paper'
+      };
+    } catch (err) {
+      if (attempt === MAX_RETRIES) {
+        logger.warn('Text layout Claude call failed, using defaults', { err: err.message });
+        return { highlighted_phrases: [], text_alignment: 'left', title_size: 'medium', texture_variant: 'paper' };
+      }
+      await new Promise(r => setTimeout(r, 800));
+    }
+  }
+}
+
+module.exports = { generateDesignJSON, generateTextLayout };

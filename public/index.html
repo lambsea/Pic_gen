@@ -58,20 +58,6 @@
           <!-- Text-Only Mode Fields -->
           <div id="text-mode-fields" hidden>
             <div class="field-group">
-              <label class="field-label" for="text-highlights">Highlight Phrases</label>
-              <input
-                type="text"
-                id="text-highlights"
-                name="text-highlights"
-                class="field-input"
-                placeholder="Web3, 牛市, Alpha（用逗号分隔多个词组）"
-                autocomplete="off"
-                aria-describedby="highlights-hint"
-              >
-              <span class="field-hint" id="highlights-hint">输入要高亮显示的词语，用英文逗号分隔。留空则不高亮。</span>
-            </div>
-
-            <div class="field-group">
               <div class="field-label">Background</div>
               <div class="bg-selector" role="group" aria-label="Background color">
                 <button type="button" class="bg-option active" id="bg-dark-btn" data-bg="dark">
@@ -85,6 +71,7 @@
                   <span class="bg-option__hex">#F5F7FA</span>
                 </button>
               </div>
+              <span class="field-hint">Claude 将根据标题自动决定排版和高亮词组</span>
             </div>
           </div>
 
@@ -200,6 +187,7 @@
       <section id="result-section" class="section" aria-label="Generated cover result" hidden>
         <!-- Text Compositor Preview -->
         <div class="cover-compositor" id="cover-compositor">
+          <div class="compositor-texture-layer" id="compositor-texture-layer"></div>
           <img class="compositor-base-image" id="compositor-base-image" src="" alt="">
           <div class="compositor-overlay" id="compositor-overlay"></div>
           <div class="compositor-text" id="compositor-text">

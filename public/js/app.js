@@ -82,6 +82,7 @@
   var authorInput          = document.getElementById('author');
   var platformSelect       = document.getElementById('platform');
 
+  var compositorTextureLayer = document.getElementById('compositor-texture-layer');
   var compositorAuthorEl   = document.getElementById('compositor-author');
   var compositorDecorEl    = document.getElementById('compositor-decorator');
   var textVisibilityToggle = document.getElementById('compositor-text-toggle');
@@ -91,7 +92,6 @@
   var tabText            = document.getElementById('tab-text');
   var aiModeFields       = document.getElementById('ai-mode-fields');
   var textModeFields     = document.getElementById('text-mode-fields');
-  var textHighlightsInput = document.getElementById('text-highlights');
   var bgDarkBtn          = document.getElementById('bg-dark-btn');
   var bgLightBtn         = document.getElementById('bg-light-btn');
 
@@ -106,6 +106,7 @@
   var pendingDefaultLang = null;
   var selectedStyleId = null;
   var platformsMap = {};
+  var lastTextHighlights = []; // stores array from last Claude layout call
   var currentMode    = 'ai';   // 'ai' | 'text'
   var textBgChoice   = 'dark'; // 'dark' | 'light'
 
@@ -229,10 +230,8 @@
     titleInput.classList.remove('invalid');
 
     if (currentMode === 'text') {
-      var highlightsRaw = textHighlightsInput ? textHighlightsInput.value : '';
       generateTextOnlyCover({
         title: title,
-        highlights: highlightsRaw,
         bg: textBgChoice,
         author: authorInput ? authorInput.value.trim() : '',
         platform: platformSelect ? platformSelect.value : 'twitter_article'
@@ -530,16 +529,22 @@
     return segments;
   }
 
-  function applyHighlightsToElement(el, title, highlightStr) {
+  function applyHighlightsToElement(el, title, highlightsInput) {
     clearChildren(el);
-    var phrases = (highlightStr || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    // Accept either string (comma-separated) or array
+    var phrases;
+    if (Array.isArray(highlightsInput)) {
+      phrases = highlightsInput.map(function (s) { return s.trim(); }).filter(Boolean);
+    } else {
+      phrases = (highlightsInput || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    }
     var segments = buildHighlightSegments(title, phrases);
     segments.forEach(function (seg) {
       if (seg.highlight) {
-        var em = document.createElement('em');
-        em.className = 'text-highlight';
-        em.textContent = seg.text;
-        el.appendChild(em);
+        var mark = document.createElement('mark');
+        mark.className = 'text-highlight';
+        mark.textContent = seg.text;
+        el.appendChild(mark);
       } else {
         el.appendChild(document.createTextNode(seg.text));
       }
@@ -547,10 +552,33 @@
   }
 
   /* ----------------------------------------------------------
-     Text-Only Cover Generation
+     Text-Only Cover Generation (Claude-driven layout)
   ---------------------------------------------------------- */
   function generateTextOnlyCover(opts) {
-    var bgColor  = opts.bg === 'light' ? '#F5F7FA' : '#0A0A0A';
+    setState('loading');
+
+    fetch('/api/text-cover-layout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: opts.title, bg: opts.bg })
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (layout) {
+        renderTextOnlyResult(opts, layout);
+      })
+      .catch(function () {
+        // Fallback to defaults if Claude call fails
+        renderTextOnlyResult(opts, {
+          highlighted_phrases: [],
+          text_alignment: 'left',
+          title_size: opts.title.length <= 8 ? 'large' : opts.title.length <= 18 ? 'medium' : 'small',
+          texture_variant: 'paper'
+        });
+      });
+  }
+
+  function renderTextOnlyResult(opts, layout) {
+    var bgColor   = opts.bg === 'light' ? '#F5F7FA' : '#0A0A0A';
     var textColor = opts.bg === 'light' ? '#111827' : '#FFFFFF';
     var authorVal = opts.author
       ? (opts.author.startsWith('@') ? opts.author : '@' + opts.author)
@@ -565,13 +593,21 @@
     compositorEl.classList.add('cover-compositor--text-only');
     compositorEl.style.setProperty('--solid-bg', bgColor);
     compositorEl.dataset.textBg = opts.bg;
+    compositorEl.dataset.texture = layout.texture_variant || 'paper';
+
+    // Apply texture to texture layer
+    if (compositorTextureLayer) {
+      compositorTextureLayer.className = 'compositor-texture-layer texture-' + (layout.texture_variant || 'paper');
+      compositorTextureLayer.dataset.bg = opts.bg;
+    }
 
     // Hide base image and overlay
     compositorImg.style.display = 'none';
     compositorOverlay.style.display = 'none';
 
-    // Apply highlighted title using DOM methods (no innerHTML)
-    applyHighlightsToElement(compositorTitleEl, opts.title, opts.highlights);
+    // Apply highlighted title using safe DOM methods
+    applyHighlightsToElement(compositorTitleEl, opts.title, layout.highlighted_phrases || []);
+    lastTextHighlights = layout.highlighted_phrases || [];
     compositorSubEl.textContent = '';
     compositorSubEl.hidden = true;
 
@@ -582,30 +618,27 @@
     applyFontColor(textColor);
     fontColorPicker.value = textColor;
 
-    // Reset controls
+    // Apply layout decisions from Claude
     compTitleInput.value = opts.title;
     compSubtitleInput.value = '';
     subtitleToggle.checked = false;
-    applyHpos('center');
-    applyTitleSize('large');
+    applyHpos(layout.text_alignment || 'left');
+    applyTitleSize(layout.title_size || 'medium');
 
-    // Hide overlay slider row since there's no overlay
+    // Hide overlay slider (no overlay in text-only)
     var opacityField = opacitySlider && opacitySlider.closest('.compositor-field');
     if (opacityField) opacityField.style.display = 'none';
 
-    // Update download original button (no original for text-only)
+    // Update download original button
     downloadOriginalBtn.href = '#';
     downloadOriginalBtn.style.display = 'none';
 
-    // Apply default font based on language detection (simple heuristic)
+    // Auto-select default font based on language detection
     var hasZh = /[\u4e00-\u9fa5]/.test(opts.title);
     pendingDefaultLang = hasZh ? 'zh' : 'en';
-    applyDefaultFont(pendingDefaultLang);
-
-    // Auto-select default font
     if (fontsConfig.length) applyDefaultFont(pendingDefaultLang);
 
-    // Hide result-card metadata section (no Claude data to show)
+    // Hide result-card metadata section (no Claude image data)
     var resultCard = document.querySelector('.result-card');
     if (resultCard) resultCard.style.display = 'none';
 
@@ -899,8 +932,7 @@
   function initCompositorListeners() {
     compTitleInput.addEventListener('input', function () {
       if (compositorEl.classList.contains('cover-compositor--text-only')) {
-        var highlightsRaw = textHighlightsInput ? textHighlightsInput.value : '';
-        applyHighlightsToElement(compositorTitleEl, compTitleInput.value, highlightsRaw);
+        applyHighlightsToElement(compositorTitleEl, compTitleInput.value, lastTextHighlights);
       } else {
         compositorTitleEl.textContent = compTitleInput.value;
       }
