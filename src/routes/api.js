@@ -29,7 +29,9 @@ function ensureOutputsDir() {
 const FONTS_DIR = path.resolve(process.cwd(), 'public', 'fonts');
 
 function getValidFonts(fontsData) {
-  return fontsData.filter(entry => {
+  var fontList = Array.isArray(fontsData) ? fontsData
+                 : (fontsData && Array.isArray(fontsData.fonts) ? fontsData.fonts : []);
+  return fontList.filter(entry => {
     if (!entry.file || typeof entry.file !== 'string') return false;
     const filePath = path.resolve(FONTS_DIR, entry.file);
     if (!filePath.startsWith(FONTS_DIR + path.sep)) return false;

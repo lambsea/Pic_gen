@@ -84,8 +84,8 @@
   var loadingTimerId = null;
   var toastTimerId   = null;
   var msgIndex       = 0;
-  var currentFontId  = null;
-  var fontsConfig    = [];   // array of font objects from /api/fonts-config
+  var fontsConfig       = [];   // array of font objects from /api/fonts-config
+  var pendingDefaultLang = null;
 
   /* ----------------------------------------------------------
      State Machine
@@ -429,6 +429,7 @@
       .then(function (data) {
         fontsConfig = Array.isArray(data) ? data : [];
         buildFontCards();
+        if (pendingDefaultLang) applyDefaultFont(pendingDefaultLang);
       })
       .catch(function () { fontsConfig = []; });
   }
@@ -471,7 +472,6 @@
   }
 
   function selectFont(font) {
-    currentFontId = font.id;
     // Update active card highlight
     var allCards = document.querySelectorAll('.font-card');
     allCards.forEach(function (c) {
@@ -481,6 +481,13 @@
     var fontStack = "'" + font.family + "', sans-serif";
     compositorTitleEl.style.fontFamily = fontStack;
     compositorSubEl.style.fontFamily = fontStack;
+  }
+
+  function applyDefaultFont(lang) {
+    if (!fontsConfig.length) return; // will be called again after load
+    var defaultFont = fontsConfig.find(function (f) { return f.language === lang; });
+    if (!defaultFont) defaultFont = fontsConfig[0];
+    if (defaultFont) selectFont(defaultFont);
   }
 
   /* ----------------------------------------------------------
@@ -520,7 +527,7 @@
     if (data.layout_spec && typeof data.layout_spec.overlay_opacity === 'number') {
       opacity = data.layout_spec.overlay_opacity;
     }
-    opacitySlider.value = opacity;
+    opacitySlider.value = String(opacity);
     updateOverlayOpacity(opacity);
 
     // Hide old image wrap, show compositor
@@ -528,12 +535,8 @@
     if (oldWrap) oldWrap.classList.add('compositor-active');
 
     // Auto-select default font based on detected_language
-    if (fontsConfig.length > 0) {
-      var lang = (data.detected_language || 'en').toLowerCase();
-      var defaultFont = fontsConfig.find(function (f) { return f.language === lang; });
-      if (!defaultFont) defaultFont = fontsConfig[0];
-      if (defaultFont) selectFont(defaultFont);
-    }
+    pendingDefaultLang = (data.detected_language || 'en').toLowerCase();
+    applyDefaultFont(pendingDefaultLang);
 
     // Wire download original button
     downloadOriginalBtn.href = data.imageUrl || '#';
@@ -592,6 +595,12 @@
       });
     }).then(function (canvas) {
       canvas.toBlob(function (blob) {
+        if (!blob) {
+          showToast('Export failed: could not encode image.');
+          compositorDlBtn.classList.remove('is-loading');
+          compositorDlBtn.disabled = false;
+          return;
+        }
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
         a.href = url;
