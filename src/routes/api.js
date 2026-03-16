@@ -24,6 +24,60 @@ function ensureOutputsDir() {
 }
 
 // -----------------------------------------------
+// Shared font-filter helper
+// -----------------------------------------------
+const FONTS_DIR = path.resolve(process.cwd(), 'public', 'fonts');
+
+function getValidFonts(fontsData) {
+  return fontsData.filter(entry => {
+    if (!entry.file || typeof entry.file !== 'string') return false;
+    const filePath = path.resolve(FONTS_DIR, entry.file);
+    if (!filePath.startsWith(FONTS_DIR + path.sep)) return false;
+    return fs.existsSync(filePath);
+  });
+}
+
+// -----------------------------------------------
+// SSRF URL validator for proxy-image
+// -----------------------------------------------
+const PRIVATE_IP_PATTERNS = [
+  /^localhost$/i,
+  /^127\./,
+  /^0\.0\.0\.0$/,
+  /^10\./,
+  /^172\.(1[6-9]|2[0-9]|3[01])\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^::1$/
+];
+
+function validateProxyUrl(urlString) {
+  let parsed;
+  try {
+    parsed = new URL(urlString);
+  } catch (_) {
+    return false;
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return false;
+  }
+
+  const hostname = parsed.hostname;
+
+  for (const pattern of PRIVATE_IP_PATTERNS) {
+    if (pattern.test(hostname)) return false;
+  }
+
+  // Allowlist: hostname must end in recraft.ai
+  if (!hostname.endsWith('recraft.ai')) {
+    return false;
+  }
+
+  return true;
+}
+
+// -----------------------------------------------
 // GET /api/health
 // -----------------------------------------------
 router.get('/health', (req, res) => {
@@ -171,18 +225,16 @@ router.get('/fonts', (req, res) => {
   let fonts;
   try {
     fonts = JSON.parse(fs.readFileSync(fontsJsonPath, 'utf8'));
-  } catch (_err) {
+  } catch (err) {
+    logger.warn('Failed to read or parse fonts.json', { error: err.message });
     return res.status(200).type('text/plain').send('');
   }
 
-  const css = fonts
-    .filter(entry => {
-      const filePath = path.resolve(process.cwd(), 'public/fonts', entry.file);
-      return fs.existsSync(filePath);
-    })
+  const css = getValidFonts(fonts)
     .map(entry => `@font-face {\n  font-family: '${entry.family}';\n  src: url('/fonts/${entry.file}') format('${entry.format}');\n  font-display: swap;\n}`)
     .join('\n\n');
 
+  res.set('Cache-Control', 'public, max-age=3600');
   res.status(200).type('text/plain').send(css);
 });
 
@@ -194,15 +246,14 @@ router.get('/fonts-config', (req, res) => {
   let fonts;
   try {
     fonts = JSON.parse(fs.readFileSync(fontsJsonPath, 'utf8'));
-  } catch (_err) {
+  } catch (err) {
+    logger.warn('Failed to read or parse fonts.json', { error: err.message });
     return res.status(200).json([]);
   }
 
-  const validFonts = fonts.filter(entry => {
-    const filePath = path.resolve(process.cwd(), 'public/fonts', entry.file);
-    return fs.existsSync(filePath);
-  });
+  const validFonts = getValidFonts(fonts);
 
+  res.set('Cache-Control', 'public, max-age=3600');
   res.status(200).json(validFonts);
 });
 
@@ -212,18 +263,21 @@ router.get('/fonts-config', (req, res) => {
 router.get('/proxy-image', async (req, res) => {
   const { url } = req.query;
   if (!url || url.trim().length === 0) {
-    return res.status(400).json({ error: 'url param required' });
+    return res.status(400).json({ error: { code: 'MISSING_URL', message: 'url param required' } });
+  }
+
+  if (!validateProxyUrl(url)) {
+    return res.status(400).json({ error: { code: 'INVALID_URL', message: 'URL not allowed' } });
   }
 
   try {
     const response = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
-    const buffer = Buffer.from(response.data);
-    const jpeg = await sharp(buffer).jpeg({ quality: 95 }).toBuffer();
+    const jpeg = await sharp(response.data).jpeg({ quality: 95 }).toBuffer();
     res.set('Content-Type', 'image/jpeg');
     res.send(jpeg);
   } catch (err) {
     logger.warn('proxy-image failed', { url, error: err.message });
-    res.status(502).json({ error: 'Proxy failed' });
+    res.status(502).json({ error: { code: 'PROXY_ERROR', message: 'Proxy failed' } });
   }
 });
 
