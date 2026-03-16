@@ -4,6 +4,8 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
+const sharp = require('sharp');
 const router = express.Router();
 
 const { version } = require('../../package.json');
@@ -158,6 +160,70 @@ router.get('/outputs/:id', (req, res) => {
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: { code: 'READ_ERROR', message: 'Failed to read output file' } });
+  }
+});
+
+// -----------------------------------------------
+// GET /api/fonts
+// -----------------------------------------------
+router.get('/fonts', (req, res) => {
+  const fontsJsonPath = path.resolve(process.cwd(), 'data/fonts.json');
+  let fonts;
+  try {
+    fonts = JSON.parse(fs.readFileSync(fontsJsonPath, 'utf8'));
+  } catch (_err) {
+    return res.status(200).type('text/plain').send('');
+  }
+
+  const css = fonts
+    .filter(entry => {
+      const filePath = path.resolve(process.cwd(), 'public/fonts', entry.file);
+      return fs.existsSync(filePath);
+    })
+    .map(entry => `@font-face {\n  font-family: '${entry.family}';\n  src: url('/fonts/${entry.file}') format('${entry.format}');\n  font-display: swap;\n}`)
+    .join('\n\n');
+
+  res.status(200).type('text/plain').send(css);
+});
+
+// -----------------------------------------------
+// GET /api/fonts-config
+// -----------------------------------------------
+router.get('/fonts-config', (req, res) => {
+  const fontsJsonPath = path.resolve(process.cwd(), 'data/fonts.json');
+  let fonts;
+  try {
+    fonts = JSON.parse(fs.readFileSync(fontsJsonPath, 'utf8'));
+  } catch (_err) {
+    return res.status(200).json([]);
+  }
+
+  const validFonts = fonts.filter(entry => {
+    const filePath = path.resolve(process.cwd(), 'public/fonts', entry.file);
+    return fs.existsSync(filePath);
+  });
+
+  res.status(200).json(validFonts);
+});
+
+// -----------------------------------------------
+// GET /api/proxy-image
+// -----------------------------------------------
+router.get('/proxy-image', async (req, res) => {
+  const { url } = req.query;
+  if (!url || url.trim().length === 0) {
+    return res.status(400).json({ error: 'url param required' });
+  }
+
+  try {
+    const response = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
+    const buffer = Buffer.from(response.data);
+    const jpeg = await sharp(buffer).jpeg({ quality: 95 }).toBuffer();
+    res.set('Content-Type', 'image/jpeg');
+    res.send(jpeg);
+  } catch (err) {
+    logger.warn('proxy-image failed', { url, error: err.message });
+    res.status(502).json({ error: 'Proxy failed' });
   }
 });
 
