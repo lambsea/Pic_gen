@@ -689,3 +689,326 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==================== TEXT COMPOSITOR ==================== */
+
+/* --- Preview container --- */
+.cover-compositor {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #0a0a0a;
+  margin-bottom: 1.5rem;
+}
+
+.compositor-base-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.compositor-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,var(--overlay-opacity, 0.45)) 60%, transparent);
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+.compositor-text {
+  position: absolute;
+  bottom: 8%;
+  left: 6%;
+  right: 6%;
+  pointer-events: none;
+}
+
+.compositor-text.center-align {
+  text-align: center;
+  left: 10%;
+  right: 10%;
+}
+
+.compositor-title {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+  word-break: break-word;
+}
+
+.compositor-title.text-dark {
+  color: #1a202c;
+}
+
+.compositor-subtitle {
+  font-size: clamp(0.9rem, 2vw, 1.4rem);
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 0.5em;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.compositor-subtitle.text-dark {
+  color: rgba(26, 32, 44, 0.85);
+}
+
+.compositor-subtitle[hidden] {
+  display: none;
+}
+
+/* --- Controls panel --- */
+.compositor-controls {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.compositor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.compositor-field--row {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.compositor-field-grow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.compositor-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.compositor-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: border-color 150ms, box-shadow 150ms;
+  box-sizing: border-box;
+}
+
+.compositor-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 59,130,246), 0.15);
+}
+
+/* --- Font selector --- */
+.compositor-fonts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.compositor-fonts-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.compositor-fonts-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.compositor-font-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.font-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  min-width: 80px;
+  background: var(--bg-secondary);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms, transform 100ms;
+  user-select: none;
+  gap: 0.25rem;
+}
+
+.font-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.font-card.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg-secondary));
+}
+
+.font-card__name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.font-card__label {
+  font-size: 0.6875rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* --- Subtitle toggle --- */
+.compositor-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-bottom: 0.125rem;
+}
+
+.compositor-toggle input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.compositor-toggle-track {
+  display: block;
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--border);
+  position: relative;
+  transition: background 200ms;
+}
+
+.compositor-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 200ms;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.compositor-toggle input:checked + .compositor-toggle-track {
+  background: var(--accent);
+}
+
+.compositor-toggle input:checked + .compositor-toggle-track::after {
+  transform: translateX(18px);
+}
+
+/* --- Opacity slider --- */
+.compositor-opacity-row {
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.compositor-opacity-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.compositor-opacity-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 2.75rem;
+  text-align: right;
+}
+
+.compositor-slider {
+  flex: 1;
+  min-width: 120px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+.compositor-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 150ms;
+}
+
+.compositor-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.compositor-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* --- Compositor actions --- */
+.compositor-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* --- Download loading state --- */
+.btn.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  cursor: default;
+}
+
+.btn.is-loading .btn-icon svg {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* --- Hide the old standalone image wrap when compositor is shown --- */
+.result-image-wrap.compositor-active {
+  display: none;
+}
