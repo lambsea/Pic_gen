@@ -5,3 +5,4 @@ outputs/*.json
 *.log
 .DS_Store
 public/fonts/*.woff2
+public/fonts/*.otf

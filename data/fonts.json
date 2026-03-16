@@ -4,7 +4,7 @@
     { "id": "playfair", "name": "Playfair Display", "family": "Playfair Display", "file": "PlayfairDisplay.woff2", "format": "woff2", "label": "Editorial Serif", "language": "en" },
     { "id": "space_grotesk", "name": "Space Grotesk", "family": "Space Grotesk", "file": "SpaceGrotesk.woff2", "format": "woff2", "label": "Tech Bold", "language": "en" },
     { "id": "zh_font1", "name": "中文字体一", "family": "ZHFont1", "file": "ZHFont1.woff2", "format": "woff2", "label": "标准黑体", "language": "zh" },
-    { "id": "zh_font2", "name": "中文字体二", "family": "ZHFont2", "file": "ZHFont2.woff2", "format": "woff2", "label": "衬线宋体", "language": "zh" },
+    { "id": "zh_font2", "name": "汇文明朝体", "family": "HuiwenMingchao", "file": "HuiwenMingchao.otf", "format": "opentype", "label": "衬线宋体", "language": "zh" },
     { "id": "zh_font3", "name": "中文字体三", "family": "ZHFont3", "file": "ZHFont3.woff2", "format": "woff2", "label": "创意字体", "language": "zh" }
   ]
 }
