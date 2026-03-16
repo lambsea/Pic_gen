@@ -1230,3 +1230,166 @@ button {
 .style-card__name {
   white-space: nowrap;
 }
+
+/* ============================================================
+   Mode Tabs
+   ============================================================ */
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-input);
+  border-radius: var(--radius-btn);
+  padding: 4px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+
+.mode-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: calc(var(--radius-btn) - 2px);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  font-family: var(--font-system);
+}
+
+.mode-tab:hover:not(.active) {
+  color: var(--text-primary);
+  background: rgba(0,0,0,.04);
+}
+
+.mode-tab.active {
+  background: #fff;
+  color: var(--accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+/* ============================================================
+   Background Selector (text-only mode)
+   ============================================================ */
+.bg-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.bg-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-input);
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  font-family: var(--font-system);
+}
+
+.bg-option:hover:not(.active) {
+  border-color: #9CA3AF;
+}
+
+.bg-option.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+  background: var(--accent-subtle);
+}
+
+.bg-option__swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.bg-option__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bg-option__hex {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  margin-left: auto;
+}
+
+/* ============================================================
+   Text Highlight Span
+   ============================================================ */
+.text-highlight {
+  font-style: normal;
+  color: #FFC857;
+}
+
+/* On light background, use a deeper amber for contrast */
+.cover-compositor--text-only[data-text-bg="light"] .text-highlight {
+  color: #D97706;
+}
+
+/* ============================================================
+   Text-Only Compositor Mode
+   ============================================================ */
+.cover-compositor--text-only {
+  background: var(--solid-bg, #0A0A0A);
+}
+
+.cover-compositor--text-only .compositor-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8% 10%;
+}
+
+.cover-compositor--text-only .compositor-text[data-hpos="center"] {
+  align-items: center;
+  text-align: center;
+}
+
+.cover-compositor--text-only .compositor-text[data-hpos="right"] {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.cover-compositor--text-only .compositor-title {
+  font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.cover-compositor--text-only .compositor-title.title-large {
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+}
+
+.cover-compositor--text-only .compositor-title.title-small {
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+/* Decorator line above title in text-only mode */
+.cover-compositor--text-only .compositor-decorator {
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: #FFC857;
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+
+.cover-compositor--text-only[data-text-bg="light"] .compositor-decorator {
+  background: #D97706;
+}

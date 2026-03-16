@@ -87,6 +87,14 @@
   var textVisibilityToggle = document.getElementById('compositor-text-toggle');
   var hposBtns             = document.getElementById('compositor-hpos-btns');
 
+  var tabAi              = document.getElementById('tab-ai');
+  var tabText            = document.getElementById('tab-text');
+  var aiModeFields       = document.getElementById('ai-mode-fields');
+  var textModeFields     = document.getElementById('text-mode-fields');
+  var textHighlightsInput = document.getElementById('text-highlights');
+  var bgDarkBtn          = document.getElementById('bg-dark-btn');
+  var bgLightBtn         = document.getElementById('bg-light-btn');
+
   /* ----------------------------------------------------------
      State
   ---------------------------------------------------------- */
@@ -98,6 +106,38 @@
   var pendingDefaultLang = null;
   var selectedStyleId = null;
   var platformsMap = {};
+  var currentMode    = 'ai';   // 'ai' | 'text'
+  var textBgChoice   = 'dark'; // 'dark' | 'light'
+
+  /* ----------------------------------------------------------
+     Mode Tab Switching
+  ---------------------------------------------------------- */
+  function switchMode(mode) {
+    currentMode = mode;
+
+    tabAi.classList.toggle('active', mode === 'ai');
+    tabAi.setAttribute('aria-selected', String(mode === 'ai'));
+    tabText.classList.toggle('active', mode === 'text');
+    tabText.setAttribute('aria-selected', String(mode === 'text'));
+
+    if (aiModeFields)   aiModeFields.hidden   = (mode === 'text');
+    if (textModeFields) textModeFields.hidden = (mode === 'ai');
+  }
+
+  if (tabAi)   tabAi.addEventListener('click',   function () { switchMode('ai'); });
+  if (tabText) tabText.addEventListener('click',  function () { switchMode('text'); });
+
+  if (bgDarkBtn) bgDarkBtn.addEventListener('click', function () {
+    textBgChoice = 'dark';
+    bgDarkBtn.classList.add('active');
+    if (bgLightBtn) bgLightBtn.classList.remove('active');
+  });
+
+  if (bgLightBtn) bgLightBtn.addEventListener('click', function () {
+    textBgChoice = 'light';
+    bgLightBtn.classList.add('active');
+    if (bgDarkBtn) bgDarkBtn.classList.remove('active');
+  });
 
   /* ----------------------------------------------------------
      State Machine
@@ -187,6 +227,18 @@
 
     showTitleError(false);
     titleInput.classList.remove('invalid');
+
+    if (currentMode === 'text') {
+      var highlightsRaw = textHighlightsInput ? textHighlightsInput.value : '';
+      generateTextOnlyCover({
+        title: title,
+        highlights: highlightsRaw,
+        bg: textBgChoice,
+        author: authorInput ? authorInput.value.trim() : '',
+        platform: platformSelect ? platformSelect.value : 'twitter_article'
+      });
+      return;
+    }
 
     var url               = urlInput.value.trim();
     var category          = categoryInput.value.trim();
@@ -362,6 +414,15 @@
     formEl.reset();
     showTitleError(false);
     titleInput.classList.remove('invalid');
+    // Reset text-only state
+    compositorEl.classList.remove('cover-compositor--text-only');
+    compositorImg.style.display = '';
+    compositorOverlay.style.display = '';
+    var opacityField = opacitySlider && opacitySlider.closest('.compositor-field');
+    if (opacityField) opacityField.style.display = '';
+    downloadOriginalBtn.style.display = '';
+    var resultCard = document.querySelector('.result-card');
+    if (resultCard) resultCard.style.display = '';
     setState('form');
   });
 
@@ -439,6 +500,116 @@
       .replace(/[\s_]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .substring(0, 60) || 'cover';
+  }
+
+  /* ----------------------------------------------------------
+     Highlight Segments Builder
+  ---------------------------------------------------------- */
+  function buildHighlightSegments(title, phrases) {
+    if (!phrases.length) return [{ text: title, highlight: false }];
+    var segments = [];
+    var i = 0;
+    var pos = 0;
+    while (i < title.length) {
+      var matched = false;
+      for (var h = 0; h < phrases.length; h++) {
+        var phrase = phrases[h];
+        if (!phrase) continue;
+        if (title.substr(i, phrase.length).toLowerCase() === phrase.toLowerCase()) {
+          if (i > pos) segments.push({ text: title.slice(pos, i), highlight: false });
+          segments.push({ text: title.slice(i, i + phrase.length), highlight: true });
+          pos = i + phrase.length;
+          i = pos;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) i++;
+    }
+    if (pos < title.length) segments.push({ text: title.slice(pos), highlight: false });
+    return segments;
+  }
+
+  function applyHighlightsToElement(el, title, highlightStr) {
+    clearChildren(el);
+    var phrases = (highlightStr || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    var segments = buildHighlightSegments(title, phrases);
+    segments.forEach(function (seg) {
+      if (seg.highlight) {
+        var em = document.createElement('em');
+        em.className = 'text-highlight';
+        em.textContent = seg.text;
+        el.appendChild(em);
+      } else {
+        el.appendChild(document.createTextNode(seg.text));
+      }
+    });
+  }
+
+  /* ----------------------------------------------------------
+     Text-Only Cover Generation
+  ---------------------------------------------------------- */
+  function generateTextOnlyCover(opts) {
+    var bgColor  = opts.bg === 'light' ? '#F5F7FA' : '#0A0A0A';
+    var textColor = opts.bg === 'light' ? '#111827' : '#FFFFFF';
+    var authorVal = opts.author
+      ? (opts.author.startsWith('@') ? opts.author : '@' + opts.author)
+      : '';
+
+    // Apply platform ratio
+    if (opts.platform && platformsMap[opts.platform] && compositorEl) {
+      compositorEl.style.setProperty('--platform-ratio', platformsMap[opts.platform].cssRatio);
+    }
+
+    // Switch compositor to text-only mode
+    compositorEl.classList.add('cover-compositor--text-only');
+    compositorEl.style.setProperty('--solid-bg', bgColor);
+    compositorEl.dataset.textBg = opts.bg;
+
+    // Hide base image and overlay
+    compositorImg.style.display = 'none';
+    compositorOverlay.style.display = 'none';
+
+    // Apply highlighted title using DOM methods (no innerHTML)
+    applyHighlightsToElement(compositorTitleEl, opts.title, opts.highlights);
+    compositorSubEl.textContent = '';
+    compositorSubEl.hidden = true;
+
+    // Author
+    if (compositorAuthorEl) compositorAuthorEl.textContent = authorVal;
+
+    // Text color
+    applyFontColor(textColor);
+    fontColorPicker.value = textColor;
+
+    // Reset controls
+    compTitleInput.value = opts.title;
+    compSubtitleInput.value = '';
+    subtitleToggle.checked = false;
+    applyHpos('center');
+    applyTitleSize('large');
+
+    // Hide overlay slider row since there's no overlay
+    var opacityField = opacitySlider && opacitySlider.closest('.compositor-field');
+    if (opacityField) opacityField.style.display = 'none';
+
+    // Update download original button (no original for text-only)
+    downloadOriginalBtn.href = '#';
+    downloadOriginalBtn.style.display = 'none';
+
+    // Apply default font based on language detection (simple heuristic)
+    var hasZh = /[\u4e00-\u9fa5]/.test(opts.title);
+    pendingDefaultLang = hasZh ? 'zh' : 'en';
+    applyDefaultFont(pendingDefaultLang);
+
+    // Auto-select default font
+    if (fontsConfig.length) applyDefaultFont(pendingDefaultLang);
+
+    // Hide result-card metadata section (no Claude data to show)
+    var resultCard = document.querySelector('.result-card');
+    if (resultCard) resultCard.style.display = 'none';
+
+    setState('result');
   }
 
   /* ----------------------------------------------------------
@@ -618,6 +789,16 @@
      Compositor Initialization
   ---------------------------------------------------------- */
   function initCompositor(data) {
+    // Reset from any previous text-only mode
+    compositorEl.classList.remove('cover-compositor--text-only');
+    compositorImg.style.display = '';
+    compositorOverlay.style.display = '';
+    var opacityField = opacitySlider && opacitySlider.closest('.compositor-field');
+    if (opacityField) opacityField.style.display = '';
+    downloadOriginalBtn.style.display = '';
+    var resultCard = document.querySelector('.result-card');
+    if (resultCard) resultCard.style.display = '';
+
     // Set image — proxy if it's a remote URL
     var imageUrl = data.imageUrl || '';
     if (imageUrl.startsWith('http')) {
@@ -717,7 +898,12 @@
   ---------------------------------------------------------- */
   function initCompositorListeners() {
     compTitleInput.addEventListener('input', function () {
-      compositorTitleEl.textContent = compTitleInput.value;
+      if (compositorEl.classList.contains('cover-compositor--text-only')) {
+        var highlightsRaw = textHighlightsInput ? textHighlightsInput.value : '';
+        applyHighlightsToElement(compositorTitleEl, compTitleInput.value, highlightsRaw);
+      } else {
+        compositorTitleEl.textContent = compTitleInput.value;
+      }
     });
 
     compSubtitleInput.addEventListener('input', function () {

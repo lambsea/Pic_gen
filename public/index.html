@@ -27,6 +27,18 @@
       <!-- Form Section -->
       <section id="form-section" class="card section active" aria-label="Generate cover form">
         <form id="generate-form" novalidate>
+          <!-- Mode Tabs -->
+          <div class="mode-tabs" role="tablist" aria-label="Generation mode">
+            <button type="button" id="tab-ai" class="mode-tab active" role="tab" aria-selected="true">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M7.5 1.5C4.186 1.5 1.5 4.186 1.5 7.5s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6zm.75 8.75h-1.5v-4h1.5v4zm0-5.5h-1.5v-1.5h1.5v1.5z" fill="currentColor"/></svg>
+              AI 生成
+            </button>
+            <button type="button" id="tab-text" class="mode-tab" role="tab" aria-selected="false">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 3.5A.5.5 0 012.5 3h10a.5.5 0 010 1h-10A.5.5 0 012 3.5zm0 4A.5.5 0 012.5 7h10a.5.5 0 010 1h-10A.5.5 0 012 7.5zm0 4A.5.5 0 012.5 11h6a.5.5 0 010 1h-6A.5.5 0 012 11.5z" fill="currentColor"/></svg>
+              纯文字
+            </button>
+          </div>
+
           <div class="field-group">
             <label class="field-label" for="title">Article Title <span class="required-mark" aria-hidden="true">*</span></label>
             <input
@@ -43,18 +55,37 @@
             <span class="field-hint" id="title-hint">Required — the main subject of your cover image</span>
           </div>
 
-          <div class="field-group">
-            <label class="field-label" for="url">Article URL</label>
-            <input
-              type="url"
-              id="url"
-              name="url"
-              class="field-input"
-              placeholder="https://... (optional)"
-              autocomplete="off"
-              aria-describedby="url-hint"
-            >
-            <span class="field-hint" id="url-hint">Optional — provide a URL to enrich content analysis</span>
+          <!-- Text-Only Mode Fields -->
+          <div id="text-mode-fields" hidden>
+            <div class="field-group">
+              <label class="field-label" for="text-highlights">Highlight Phrases</label>
+              <input
+                type="text"
+                id="text-highlights"
+                name="text-highlights"
+                class="field-input"
+                placeholder="Web3, 牛市, Alpha（用逗号分隔多个词组）"
+                autocomplete="off"
+                aria-describedby="highlights-hint"
+              >
+              <span class="field-hint" id="highlights-hint">输入要高亮显示的词语，用英文逗号分隔。留空则不高亮。</span>
+            </div>
+
+            <div class="field-group">
+              <div class="field-label">Background</div>
+              <div class="bg-selector" role="group" aria-label="Background color">
+                <button type="button" class="bg-option active" id="bg-dark-btn" data-bg="dark">
+                  <span class="bg-option__swatch" style="background:#0A0A0A"></span>
+                  <span class="bg-option__label">深色</span>
+                  <span class="bg-option__hex">#0A0A0A</span>
+                </button>
+                <button type="button" class="bg-option" id="bg-light-btn" data-bg="light">
+                  <span class="bg-option__swatch" style="background:#F5F7FA;border:1px solid #E5E7EB"></span>
+                  <span class="bg-option__label">浅色</span>
+                  <span class="bg-option__hex">#F5F7FA</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="field-group">
@@ -69,6 +100,21 @@
               aria-describedby="author-hint"
             >
             <span class="field-hint" id="author-hint">Your Twitter handle — displayed on the cover</span>
+          </div>
+
+          <div id="ai-mode-fields">
+          <div class="field-group">
+            <label class="field-label" for="url">Article URL</label>
+            <input
+              type="url"
+              id="url"
+              name="url"
+              class="field-input"
+              placeholder="https://... (optional)"
+              autocomplete="off"
+              aria-describedby="url-hint"
+            >
+            <span class="field-hint" id="url-hint">Optional — provide a URL to enrich content analysis</span>
           </div>
 
           <div class="field-row">
@@ -119,6 +165,7 @@
             <label class="field-label">Visual Style</label>
             <div id="style-cards" class="style-cards"></div>
           </div>
+          </div><!-- end #ai-mode-fields -->
 
           <div id="title-error" class="field-error" role="alert" aria-live="polite" hidden>
             Please enter an article title.
