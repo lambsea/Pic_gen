@@ -1281,46 +1281,88 @@ main {
   background-image: repeating-linear-gradient(-60deg, transparent 0px, transparent 4px, rgba(0,0,0,0.02) 4px, rgba(0,0,0,0.02) 5px);
 }
 
-/* --- Text-Only Compositor --------------------------------- */
+/* ===============================================================
+   Text-Only Compositor — Editorial Cover (ystrategy style)
+   Structure:  L-border | @handle top-left | title left 58%
+               ghost watermark | vertical separator | right-panel deco
+   =============================================================== */
 .cover-compositor--text-only { background: var(--solid-bg, #0A0A0A); }
 
+/* ── L-border: top + left accent lines ── */
 .cover-compositor--text-only::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
-  z-index: 5;
-  border-top: 2px solid rgba(255,198,87,0.6);
-  border-left: 2px solid rgba(255,198,87,0.6);
+  z-index: 8;
+  border-top:  3px solid rgba(254,216,31,0.55);
+  border-left: 3px solid rgba(254,216,31,0.55);
 }
-
 .cover-compositor--text-only[data-text-bg="light"]::after {
-  border-top-color: rgba(180,120,0,0.4);
-  border-left-color: rgba(180,120,0,0.4);
+  border-top-color:  rgba(139,26,26,0.45);   /* deep red, ystrategy style */
+  border-left-color: rgba(139,26,26,0.45);
 }
 
-/* ── Text-only: full-canvas, ystrategy editorial layout ── */
+/* ── Vertical separator line at 60% ── */
+.cover-compositor--text-only .compositor-texture-layer::before {
+  content: '';
+  position: absolute;
+  left: 60%;
+  top: 10%; bottom: 10%;
+  width: 1px;
+  background: rgba(255,255,255,0.06);
+  z-index: 2;
+}
+.cover-compositor--text-only[data-text-bg="light"] .compositor-texture-layer::before {
+  background: rgba(0,0,0,0.06);
+}
+
+/* ── Right-panel decoration: large geometric circle ── */
+.cover-compositor--text-only .compositor-texture-layer::after {
+  content: '';
+  position: absolute;
+  right: 3%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32%;
+  aspect-ratio: 1;
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-radius: 50%;
+  z-index: 2;
+}
+.cover-compositor--text-only[data-text-bg="light"] .compositor-texture-layer::after {
+  border-color: rgba(0,0,0,0.06);
+}
+
+/* ── Text container: left 58% editorial panel ── */
 .cover-compositor--text-only .compositor-text {
   position: absolute;
-  inset: 0;
-  width: 100%;          /* override AI mode's 65% */
+  top: 0; left: 0; bottom: 0;
+  width: 58%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 14% 8% 8%;   /* extra top pad leaves room for the handle */
+  padding: 14% 5% 8% 7%;
   z-index: 3;
 }
+.cover-compositor--text-only .compositor-text[data-hpos="center"] {
+  width: 100%; align-items: center; text-align: center;
+}
+.cover-compositor--text-only .compositor-text[data-hpos="right"] {
+  width: 100%; align-items: flex-end; text-align: right;
+}
 
-/* ghost watermark — huge keyword behind the title */
+/* ── Ghost watermark: right side, behind everything ── */
 .cover-compositor--text-only .compositor-text::before {
   content: attr(data-watermark);
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: clamp(6rem, 22vw, 20rem);
+  right: -55%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: clamp(4rem, 14vw, 12rem);
   font-weight: 900;
-  color: rgba(255,255,255,0.032);
+  color: rgba(255,255,255,0.025);
   pointer-events: none;
   z-index: 0;
   white-space: nowrap;
@@ -1329,51 +1371,71 @@ main {
   line-height: 1;
 }
 .cover-compositor--text-only[data-text-bg="light"] .compositor-text::before {
-  color: rgba(0,0,0,0.045);
+  color: rgba(0,0,0,0.04);
 }
 
-.cover-compositor--text-only .compositor-text[data-hpos="center"] { align-items: center; text-align: center; }
-.cover-compositor--text-only .compositor-text[data-hpos="right"]  { align-items: flex-end; text-align: right; }
-
-/* ── Handle: top-left corner, outside flex flow ── */
+/* ── Handle @username: top-left, with separator line ── */
 .cover-compositor--text-only .compositor-author {
   position: absolute;
-  top: 6%; left: 7%;
-  font-size: clamp(0.65rem, 1.2vw, 0.85rem);
-  font-weight: 600;
-  opacity: 0.6;
+  top: 7%; left: 7%;
+  font-size: clamp(0.55rem, 1vw, 0.7rem);
+  font-weight: 500;
+  opacity: 0.5;
   letter-spacing: 0.06em;
   font-family: var(--font-mono);
   margin-top: 0;
 }
-.cover-compositor--text-only[data-text-bg="light"] .compositor-author { opacity: 0.45; }
+.cover-compositor--text-only .compositor-author::after {
+  content: '';
+  display: block;
+  width: 28px; height: 1px;
+  background: currentColor;
+  margin-top: 5px;
+  opacity: 0.5;
+}
+.cover-compositor--text-only[data-text-bg="light"] .compositor-author { opacity: 0.4; }
 
-/* ── Decorator bar ── */
+/* ── Decorator bar (accent line above title) ── */
 .cover-compositor--text-only .compositor-decorator {
   display: block;
-  width: 52px; height: 4px;
-  background: #FFC857;
-  border-radius: 2px;
-  margin-bottom: 16px;
+  width: 40px; height: 3px;
+  background: rgba(254,216,31,0.7);
+  border-radius: 1px;
+  margin-bottom: 12px;
   flex-shrink: 0;
   position: relative; z-index: 1;
 }
-.cover-compositor--text-only[data-text-bg="light"] .compositor-decorator { background: #D97706; }
+.cover-compositor--text-only[data-text-bg="light"] .compositor-decorator {
+  background: rgba(139,26,26,0.6);  /* deep red for light */
+}
 
-/* ── Title: ultra-bold, dominant ── */
+/* ── Title: bold & dominant, but readable on 5:2 canvas ── */
 .cover-compositor--text-only .compositor-title {
-  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
   font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
   word-break: break-word;
   overflow-wrap: break-word;
   position: relative; z-index: 1;
 }
 
-.cover-compositor--text-only .compositor-title.title-large  { font-size: clamp(4.5rem, 11vw, 10rem); line-height: 1.0; }
-.cover-compositor--text-only .compositor-title.title-medium { font-size: clamp(3.2rem, 8vw,  7rem);  line-height: 1.08; }
-.cover-compositor--text-only .compositor-title.title-small  { font-size: clamp(2.2rem, 5.5vw,4.5rem); line-height: 1.12; }
+/* large: very short titles (≤6 chars) — boldest, 1–2 lines */
+.cover-compositor--text-only .compositor-title.title-large {
+  font-size: clamp(1.8rem, 4.5vw, 3.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+/* medium: typical titles — 2–3 lines */
+.cover-compositor--text-only .compositor-title.title-medium {
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  line-height: 1.2;
+}
+/* small: longer titles — still prominent, wraps 3+ lines */
+.cover-compositor--text-only .compositor-title.title-small {
+  font-size: clamp(1rem, 2.5vw, 1.8rem);
+  line-height: 1.3;
+}
 
 /* --- Responsive ------------------------------------------- */
 @media (max-width: 600px) {

@@ -585,14 +585,14 @@
         renderTextOnlyResult(opts, {
           highlighted_phrases: [],
           text_alignment: 'left',
-          title_size: opts.title.length <= 8 ? 'large' : opts.title.length <= 18 ? 'medium' : 'small',
+          title_size: opts.title.length <= 6 ? 'large' : opts.title.length <= 16 ? 'medium' : 'small',
           texture_variant: 'paper'
         });
       });
   }
 
   function renderTextOnlyResult(opts, layout) {
-    var bgColor   = opts.bg === 'light' ? '#F5F7FA' : '#0A0A0A';
+    var bgColor   = opts.bg === 'light' ? '#F2EDE3' : '#0A0A0A';  /* warm cream / near-black */
     var textColor = opts.bg === 'light' ? '#111827' : '#FFFFFF';
     var authorVal = opts.author
       ? (opts.author.startsWith('@') ? opts.author : '@' + opts.author)
