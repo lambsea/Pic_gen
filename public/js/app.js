@@ -504,6 +504,20 @@
   /* ----------------------------------------------------------
      Highlight Segments Builder
   ---------------------------------------------------------- */
+  /**
+   * Extract a short watermark keyword from the title.
+   * Skips filler words; returns the first meaty word, uppercased.
+   */
+  function extractWatermark(title) {
+    var SKIP = /^(的|了|和|是|在|也|都|但|因|为|与|及|或|这|那|与|不|a|an|the|is|in|on|at|to|of|and|or|but|for|with|by)$/i;
+    var words = title.trim().split(/[\s，,。.！!？?：:；;、]+/).filter(Boolean);
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i].replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+      if (w.length > 1 && !SKIP.test(w)) return w.toUpperCase().substring(0, 10);
+    }
+    return (words[0] || '').toUpperCase().substring(0, 10);
+  }
+
   function buildHighlightSegments(title, phrases) {
     if (!phrases.length) return [{ text: title, highlight: false }];
     var segments = [];
@@ -611,7 +625,12 @@
     compositorSubEl.textContent = '';
     compositorSubEl.hidden = true;
 
-    // Author
+    // Ghost watermark: first highlighted phrase, or extracted keyword from title
+    var watermarkWord = (layout.highlighted_phrases && layout.highlighted_phrases[0])
+      || extractWatermark(opts.title);
+    compositorTextEl.dataset.watermark = watermarkWord;
+
+    // Author (CSS positions this at absolute top-left in text-only mode)
     if (compositorAuthorEl) compositorAuthorEl.textContent = authorVal;
 
     // Text color
@@ -826,6 +845,8 @@
     compositorEl.classList.remove('cover-compositor--text-only');
     compositorImg.style.display = '';
     compositorOverlay.style.display = '';
+    // Clear watermark ghost
+    compositorTextEl.dataset.watermark = '';
     var opacityField = opacitySlider && opacitySlider.closest('.compositor-field');
     if (opacityField) opacityField.style.display = '';
     downloadOriginalBtn.style.display = '';
