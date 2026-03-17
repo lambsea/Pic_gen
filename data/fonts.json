@@ -1,10 +1,103 @@
 {
   "fonts": [
-    { "id": "inter", "name": "Inter", "family": "Inter", "file": "Inter.woff2", "format": "woff2", "label": "Modern Sans", "language": "en" },
-    { "id": "playfair", "name": "Playfair Display", "family": "Playfair Display", "file": "PlayfairDisplay.woff2", "format": "woff2", "label": "Editorial Serif", "language": "en" },
-    { "id": "space_grotesk", "name": "Space Grotesk", "family": "Space Grotesk", "file": "SpaceGrotesk.woff2", "format": "woff2", "label": "Tech Bold", "language": "en" },
-    { "id": "zh_font1", "name": "中文字体一", "family": "ZHFont1", "file": "ZHFont1.woff2", "format": "woff2", "label": "标准黑体", "language": "zh" },
-    { "id": "zh_font2", "name": "汇文明朝体", "family": "HuiwenMingchao", "file": "HuiwenMingchao.otf", "format": "opentype", "label": "衬线宋体", "language": "zh" },
-    { "id": "zh_font3", "name": "中文字体三", "family": "ZHFont3", "file": "ZHFont3.woff2", "format": "woff2", "label": "创意字体", "language": "zh" }
+    {
+      "id": "angst_bold",
+      "name": "Angst Bold",
+      "family": "AngstBold",
+      "file": "AngstBold.otf",
+      "format": "opentype",
+      "label": "强力无衬线",
+      "language": "en"
+    },
+    {
+      "id": "angst_bold_serif",
+      "name": "Angst Serif",
+      "family": "AngstBoldSerif",
+      "file": "AngstBoldSerif.otf",
+      "format": "opentype",
+      "label": "衬线粗体",
+      "language": "en"
+    },
+    {
+      "id": "angst_normal",
+      "name": "Angst",
+      "family": "AngstNormal",
+      "file": "AngstNormal.otf",
+      "format": "opentype",
+      "label": "轻盈无衬线",
+      "language": "en"
+    },
+    {
+      "id": "angst_normal_serif",
+      "name": "Angst Serif Light",
+      "family": "AngstNormalSerif",
+      "file": "AngstNormalSerif.otf",
+      "format": "opentype",
+      "label": "衬线常规",
+      "language": "en"
+    },
+    {
+      "id": "angst_thin",
+      "name": "Angst Thin",
+      "family": "AngstThin",
+      "file": "AngstThin.otf",
+      "format": "opentype",
+      "label": "纤细极简",
+      "language": "en"
+    },
+    {
+      "id": "jin_gang",
+      "name": "金刚体",
+      "family": "JinGangTi",
+      "file": "JinGangTi.otf",
+      "format": "opentype",
+      "label": "创客贴金刚 · 冲击力",
+      "language": "zh"
+    },
+    {
+      "id": "huiwen_ming",
+      "name": "明朝体",
+      "family": "HuiwenMingchao",
+      "file": "HuiwenMingchao.otf",
+      "format": "opentype",
+      "label": "汇文明朝 · 典雅衬线",
+      "language": "zh"
+    },
+    {
+      "id": "fei_hua_song",
+      "name": "飞花宋",
+      "family": "FeiHuaSong",
+      "file": "FeiHuaSong.ttf",
+      "format": "truetype",
+      "label": "飞花宋体 · 传统宋",
+      "language": "zh"
+    },
+    {
+      "id": "pfan_hu_tu",
+      "name": "胡涂体",
+      "family": "PFanHuTuTi",
+      "file": "PFanHuTuTi.otf",
+      "format": "opentype",
+      "label": "PF频凡 · 随性手写",
+      "language": "zh"
+    },
+    {
+      "id": "xiang_cui_w35",
+      "name": "打字机",
+      "family": "XiangCuiW35",
+      "file": "XiangCuiW35.ttf",
+      "format": "truetype",
+      "label": "香萃打字机 W35",
+      "language": "zh"
+    },
+    {
+      "id": "xiang_cui_w40",
+      "name": "打字机重",
+      "family": "XiangCuiW40",
+      "file": "XiangCuiW40.ttf",
+      "format": "truetype",
+      "label": "香萃打字机 W40",
+      "language": "zh"
+    }
   ]
 }
