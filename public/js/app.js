@@ -87,6 +87,10 @@
   var compositorDecorEl    = document.getElementById('compositor-decorator');
   var textVisibilityToggle = document.getElementById('compositor-text-toggle');
   var hposBtns             = document.getElementById('compositor-hpos-btns');
+  var highlightField       = document.getElementById('compositor-highlight-field');
+  var highlightInput       = document.getElementById('compositor-highlight-input');
+  var highlightSwatchesEl  = document.getElementById('compositor-highlight-swatches');
+  var highlightColorPicker = document.getElementById('compositor-highlight-color');
 
   var tabAi              = document.getElementById('tab-ai');
   var tabText            = document.getElementById('tab-text');
@@ -107,6 +111,7 @@
   var selectedStyleId = null;
   var platformsMap = {};
   var lastTextHighlights = []; // stores array from last Claude layout call
+  var currentHighlightColor = '#FFC857'; // current user-chosen highlight color
   var currentMode    = 'ai';   // 'ai' | 'text'
   var textBgChoice   = 'dark'; // 'dark' | 'light'
 
@@ -619,11 +624,21 @@
     compositorImg.style.display = 'none';
     compositorOverlay.style.display = 'none';
 
+    // Apply highlight color CSS variable
+    applyHighlightColor(currentHighlightColor);
+
     // Apply highlighted title using safe DOM methods
     applyHighlightsToElement(compositorTitleEl, opts.title, layout.highlighted_phrases || []);
     lastTextHighlights = layout.highlighted_phrases || [];
     compositorSubEl.textContent = '';
     compositorSubEl.hidden = true;
+
+    // Populate the highlight input so user can edit
+    if (highlightInput) {
+      highlightInput.value = (layout.highlighted_phrases || []).join(', ');
+    }
+    // Show highlight controls
+    if (highlightField) highlightField.hidden = false;
 
     // Ghost watermark: first highlighted phrase, or extracted keyword from title
     var watermarkWord = (layout.highlighted_phrases && layout.highlighted_phrases[0])
@@ -847,6 +862,8 @@
     compositorOverlay.style.display = '';
     // Clear watermark ghost
     compositorTextEl.dataset.watermark = '';
+    // Hide highlight controls (text-only only)
+    if (highlightField) highlightField.hidden = true;
     var opacityField = opacitySlider && opacitySlider.closest('.compositor-field');
     if (opacityField) opacityField.style.display = '';
     downloadOriginalBtn.style.display = '';
@@ -927,6 +944,16 @@
     opacityValueEl.textContent = Math.round(value * 100) + '%';
   }
 
+  function applyHighlightColor(hex) {
+    currentHighlightColor = hex;
+    compositorEl.style.setProperty('--highlight-color', hex);
+    // Determine text color for contrast: dark bg on bright highlights, white on dark
+    var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    var lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+    var textOnHl = lum > 0.55 ? '#0A0A0A' : '#FFFFFF';
+    compositorEl.style.setProperty('--highlight-text-color', textOnHl);
+  }
+
   function applyFontColor(hex) {
     compositorTitleEl.style.color = hex;
     compositorSubEl.style.color = hex;
@@ -953,7 +980,9 @@
   function initCompositorListeners() {
     compTitleInput.addEventListener('input', function () {
       if (compositorEl.classList.contains('cover-compositor--text-only')) {
-        applyHighlightsToElement(compositorTitleEl, compTitleInput.value, lastTextHighlights);
+        // Re-read highlights from the input field for live sync
+        var phrases = highlightInput ? highlightInput.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean) : lastTextHighlights;
+        applyHighlightsToElement(compositorTitleEl, compTitleInput.value, phrases);
       } else {
         compositorTitleEl.textContent = compTitleInput.value;
       }
@@ -1021,6 +1050,40 @@
       hposBtnEls.forEach(function (btn) {
         btn.addEventListener('click', function () {
           applyHpos(btn.dataset.pos);
+        });
+      });
+    }
+
+    // Highlight phrases live input
+    if (highlightInput) {
+      highlightInput.addEventListener('input', function () {
+        var phrases = highlightInput.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        lastTextHighlights = phrases;
+        applyHighlightsToElement(compositorTitleEl, compTitleInput.value, phrases);
+      });
+    }
+
+    // Highlight color swatches
+    if (highlightSwatchesEl) {
+      highlightSwatchesEl.addEventListener('click', function (e) {
+        var btn = e.target.closest('.highlight-swatch');
+        if (!btn) return;
+        var color = btn.dataset.hlColor;
+        applyHighlightColor(color);
+        highlightColorPicker.value = color;
+        highlightSwatchesEl.querySelectorAll('.highlight-swatch').forEach(function (s) {
+          s.classList.remove('active');
+        });
+        btn.classList.add('active');
+      });
+    }
+
+    // Highlight custom color picker
+    if (highlightColorPicker) {
+      highlightColorPicker.addEventListener('input', function () {
+        applyHighlightColor(highlightColorPicker.value);
+        highlightSwatchesEl.querySelectorAll('.highlight-swatch').forEach(function (s) {
+          s.classList.remove('active');
         });
       });
     }

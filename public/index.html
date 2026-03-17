@@ -225,6 +225,27 @@
             <input type="text" id="compositor-title-input" class="compositor-input" autocomplete="off">
           </div>
 
+          <!-- Highlight phrases + color (text-only mode) -->
+          <div class="compositor-field compositor-highlight-field" id="compositor-highlight-field" hidden>
+            <label class="compositor-label" for="compositor-highlight-input">Highlight Phrases</label>
+            <input type="text" id="compositor-highlight-input" class="compositor-input"
+                   placeholder="Comma separated, e.g. 设计师,拥有"
+                   autocomplete="off">
+            <span class="field-hint">Comma-separated words to highlight with color blocks</span>
+            <div class="compositor-field--row compositor-highlight-color-row" style="margin-top:8px">
+              <span class="compositor-label" style="flex-shrink:0;margin-right:6px">Color</span>
+              <div class="compositor-highlight-swatches" id="compositor-highlight-swatches">
+                <button type="button" class="highlight-swatch active" data-hl-color="#FFC857" aria-label="Warm orange" style="--swatch:#FFC857"></button>
+                <button type="button" class="highlight-swatch" data-hl-color="#CCFF00" aria-label="Neon green" style="--swatch:#CCFF00"></button>
+                <button type="button" class="highlight-swatch" data-hl-color="#FF4444" aria-label="Red" style="--swatch:#FF4444"></button>
+                <button type="button" class="highlight-swatch" data-hl-color="#4ECDC4" aria-label="Teal" style="--swatch:#4ECDC4"></button>
+                <button type="button" class="highlight-swatch" data-hl-color="#FF6B9D" aria-label="Pink" style="--swatch:#FF6B9D"></button>
+                <button type="button" class="highlight-swatch" data-hl-color="#A78BFA" aria-label="Purple" style="--swatch:#A78BFA"></button>
+              </div>
+              <input type="color" id="compositor-highlight-color" class="compositor-color-picker" value="#FFC857" aria-label="Custom highlight color">
+            </div>
+          </div>
+
           <!-- Subtitle input + toggle -->
           <div class="compositor-field compositor-field--row">
             <div class="compositor-field-grow">

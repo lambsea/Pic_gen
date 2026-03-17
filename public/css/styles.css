@@ -1226,17 +1226,33 @@ main {
 .text-highlight {
   font-style: normal;
   display: inline;
-  background: #FFC857;
-  color: #0A0A0A;
-  padding: 0.05em 0.25em 0.1em;
+  background: var(--highlight-color, #FFC857);
+  color: var(--highlight-text-color, #0A0A0A);
+  padding: 0.06em 0.28em 0.12em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
-.cover-compositor--text-only[data-text-bg="light"] .text-highlight {
-  background: #D97706;
-  color: #FFFFFF;
+/* --- Highlight Swatch Selector ----------------------------- */
+.compositor-highlight-color-row { gap: 10px; flex-wrap: wrap; align-items: center; }
+.compositor-highlight-swatches { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.highlight-swatch {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background: var(--swatch);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-flat);
+  flex-shrink: 0;
+}
+.highlight-swatch:hover { transform: scale(1.12); }
+.highlight-swatch.active {
+  border-color: var(--text-primary);
+  box-shadow: var(--shadow-inset-sm), 0 0 8px rgba(255,255,255,0.1);
+  transform: scale(1.05);
 }
 
 /* --- Texture Layer ---------------------------------------- */
