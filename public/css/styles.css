@@ -5,27 +5,27 @@
 
 /* --- Custom Properties ------------------------------------ */
 :root {
-  /* === Base surface — neumorphism requires bg ≈ element color === */
+  /* === Base surface — light neumorphism on 荔枝白 === */
   /* Palette: 长春花蓝 #5357A0 · 佛手黄 #FED81F · 荔枝白 #FEFFEF  */
-  --bg-page:        #0B0D1C;   /* near-black, blue-purple cast */
-  --bg-surface:     #10132A;   /* cards, raised elements */
-  --bg-inset:       #080A16;   /* inputs, recessed elements */
-  --bg-spec:        #080A16;
+  --bg-page:        #F0F0E4;   /* warm off-white, slight yellow cast */
+  --bg-surface:     #F7F7EB;   /* cards, raised elements */
+  --bg-inset:       #E6E6DA;   /* inputs, recessed elements */
+  --bg-spec:        #E6E6DA;
 
-  /* === Neumorphic shadow system === */
-  --neu-dark:       rgba(3,4,10,0.92);
-  --neu-light:      rgba(255,255,255,0.05);
+  /* === Neumorphic shadow system (light mode) === */
+  --neu-dark:       rgba(83,87,120,0.18);
+  --neu-light:      rgba(255,255,255,0.85);
   --shadow-raised:  6px 6px 16px var(--neu-dark), -4px -4px 10px var(--neu-light);
   --shadow-raised-sm: 4px 4px 10px var(--neu-dark), -3px -3px 7px var(--neu-light);
   --shadow-inset:   inset 4px 4px 10px var(--neu-dark), inset -3px -3px 8px var(--neu-light);
   --shadow-inset-sm: inset 3px 3px 7px var(--neu-dark), inset -2px -2px 5px var(--neu-light);
   --shadow-flat:    2px 2px 5px var(--neu-dark), -1px -1px 3px var(--neu-light);
-  --shadow-glow-accent: 0 0 20px rgba(83,87,160,0.4);
+  --shadow-glow-accent: 0 0 20px rgba(83,87,160,0.25);
 
   /* === Glass overlay === */
-  --glass-bg:       rgba(83,87,160,0.04);
-  --glass-border:   rgba(255,255,255,0.07);
-  --glass-border-hi: rgba(255,255,255,0.12);
+  --glass-bg:       rgba(255,255,255,0.45);
+  --glass-border:   rgba(83,87,160,0.10);
+  --glass-border-hi: rgba(83,87,160,0.18);
 
   /* === Primary accent — 长春花蓝 === */
   --accent:         #5357A0;
@@ -42,11 +42,11 @@
   --accent-warm-glow:   rgba(254,216,31,0.35);
   --accent-warm-subtle: rgba(254,216,31,0.12);
 
-  /* === Text hierarchy — 荔枝白 family === */
-  --text-primary:   #FEFFEF;   /* 荔枝白 */
-  --text-secondary: #9196C0;
-  --text-muted:     #3D4170;
-  --text-on-accent: #0B0D1C;  /* dark text on yellow CTA */
+  /* === Text hierarchy — dark on light === */
+  --text-primary:   #1A1D3A;   /* deep navy */
+  --text-secondary: #5357A0;   /* 长春花蓝 */
+  --text-muted:     #9196C0;
+  --text-on-accent: #1A1D3A;  /* dark text on yellow CTA */
 
   /* === Semantic colors === */
   --error:          #F87171;
@@ -55,9 +55,9 @@
   --green:          #10B981;
 
   /* === Border === */
-  --border:         rgba(255,255,255,0.07);
-  --border-hover:   rgba(255,255,255,0.12);
-  --border-focus:   rgba(83,87,160,0.65);
+  --border:         rgba(83,87,160,0.10);
+  --border-hover:   rgba(83,87,160,0.18);
+  --border-focus:   rgba(83,87,160,0.50);
 
   /* === Radius === */
   --radius-card:    20px;
@@ -88,6 +88,12 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Warped grid background — matches landing page */
+  background-image:
+    linear-gradient(rgba(83,87,160,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(83,87,160,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  background-position: center center;
 }
 
 img { display: block; max-width: 100%; }
@@ -112,7 +118,7 @@ a:hover { color: var(--accent-hover); }
 .ambient-blob--1 {
   width: 580px; height: 580px;
   /* 长春花蓝 glow — top-left */
-  background: radial-gradient(circle, rgba(83,87,160,0.13) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(83,87,160,0.10) 0%, transparent 70%);
   top: -140px; left: -140px;
   animation: blob-float 22s ease-in-out infinite;
 }
@@ -120,7 +126,7 @@ a:hover { color: var(--accent-hover); }
 .ambient-blob--2 {
   width: 440px; height: 440px;
   /* 佛手黄 glow — mid-right */
-  background: radial-gradient(circle, rgba(254,216,31,0.07) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(254,216,31,0.12) 0%, transparent 70%);
   top: 35%; right: -120px;
   animation: blob-float 18s ease-in-out infinite reverse;
   animation-delay: -8s;
@@ -168,11 +174,11 @@ main {
   top: 0;
   z-index: 100;
   /* Neumorphic + glass header */
-  background: rgba(12,15,24,0.85);
+  background: rgba(247,247,235,0.80);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 24px rgba(83,87,120,0.10);
 }
 
 .header-inner {
@@ -194,9 +200,9 @@ main {
   justify-content: center;
   /* Raised neumorphic logo */
   box-shadow:
-    4px 4px 10px rgba(3,4,10,0.85),
-    -2px -2px 6px rgba(255,255,255,0.07),
-    0 0 18px rgba(83,87,160,0.45);
+    4px 4px 10px rgba(83,87,120,0.25),
+    -2px -2px 6px rgba(255,255,255,0.80),
+    0 0 18px rgba(83,87,160,0.20);
 }
 
 .logo-mark svg { width: 18px; height: 18px; }
@@ -275,7 +281,7 @@ main {
 .field-input,
 .field-select {
   background: var(--bg-inset);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(83,87,160,0.08);
   border-radius: var(--radius-input);
   color: var(--text-primary);
   font-family: var(--font-system);
@@ -292,7 +298,7 @@ main {
 
 .field-input:hover,
 .field-select:hover {
-  border-color: rgba(255,255,255,0.09);
+  border-color: rgba(83,87,160,0.14);
 }
 
 .field-input:focus,
@@ -467,7 +473,7 @@ main {
   padding: 5px;
   margin-bottom: 26px;
   box-shadow: var(--shadow-inset);
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(83,87,160,0.06);
 }
 
 .mode-tab {
@@ -754,7 +760,7 @@ main {
 /* Inset input in controls */
 .compositor-input {
   background: var(--bg-inset);
-  border: 1px solid rgba(255,255,255,0.05);
+  border: 1px solid rgba(83,87,160,0.08);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-family: var(--font-system);
@@ -781,7 +787,7 @@ main {
   width: 42px; height: 23px;
   background: var(--bg-inset);
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(83,87,160,0.06);
   /* Inset tray */
   box-shadow: var(--shadow-inset-sm);
   position: relative;
@@ -894,7 +900,7 @@ main {
   box-shadow: var(--shadow-inset-sm);
   outline: none;
   cursor: pointer;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(83,87,160,0.06);
 }
 
 .compositor-slider::-webkit-slider-thumb {
@@ -1470,7 +1476,7 @@ main {
   border-radius: 3px;
   box-shadow: var(--shadow-flat);
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+::-webkit-scrollbar-thumb:hover { background: rgba(83,87,160,0.25); }
 
 /* --- Selection -------------------------------------------- */
 ::selection { background: var(--accent-subtle); color: var(--text-primary); }

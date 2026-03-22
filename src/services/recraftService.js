@@ -3,14 +3,19 @@
 const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
 const { RecraftAPIError } = require('../middleware/errorHandler');
 
 const RECRAFT_API_URL = 'https://external.api.recraft.ai/v1/images/generations';
 const RECRAFT_MODEL = process.env.RECRAFT_MODEL || 'recraftv4';
-const IMAGE_WIDTH = parseInt(process.env.RECRAFT_IMAGE_WIDTH || '1200');
-const IMAGE_HEIGHT = parseInt(process.env.RECRAFT_IMAGE_HEIGHT || '675');
+// Model-aware generation sizes. V3 max landscape is 1820x1024,
+// V4 supports preset 1536x768 (2:1). Both get cropped to 5:2.
+const IS_V3 = RECRAFT_MODEL.toLowerCase().includes('v3');
+const RECRAFT_GEN_WIDTH = IS_V3 ? 1820 : 1536;
+const RECRAFT_GEN_HEIGHT = IS_V3 ? 1024 : 768;
+const FINAL_RATIO = 5 / 2; // 2.5:1 — target aspect ratio
 const MAX_RETRIES = parseInt(process.env.RECRAFT_MAX_RETRIES || '2');
 const RETRY_BASE_DELAY_MS = parseInt(process.env.RECRAFT_RETRY_BASE_DELAY_MS || '1000');
 const OUTPUTS_DIR = process.env.OUTPUTS_DIR || './outputs';
@@ -36,23 +41,21 @@ function ensureOutputsDir() {
  * @returns {Promise<{ remoteUrl: string, localFilename: string, localPath: string }>}
  * @throws {RecraftAPIError} after max retries
  */
-async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null, widthOverride = null, heightOverride = null) {
+async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null) {
   const apiKey = process.env.RECRAFT_API_KEY;
   if (!apiKey) {
     throw new RecraftAPIError('RECRAFT_API_KEY environment variable is not set');
   }
 
   const effectiveStyleId = styleIdOverride || RECRAFT_STYLE_ID;
-  const effectiveWidth   = widthOverride  || IMAGE_WIDTH;
-  const effectiveHeight  = heightOverride || IMAGE_HEIGHT;
 
   logger.info('Calling Recraft API', {
     model: RECRAFT_MODEL,
     attempt: retryCount,
     promptLength: imagePrompt.length,
     styleId: effectiveStyleId,
-    width: effectiveWidth,
-    height: effectiveHeight
+    genSize: `${RECRAFT_GEN_WIDTH}x${RECRAFT_GEN_HEIGHT}`,
+    targetRatio: '5:2'
   });
 
   let remoteUrl;
@@ -63,8 +66,7 @@ async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null
         model: RECRAFT_MODEL,
         prompt: imagePrompt,
         n: 1,
-        width: effectiveWidth,
-        height: effectiveHeight,
+        size: `${RECRAFT_GEN_WIDTH}x${RECRAFT_GEN_HEIGHT}`,
         response_format: 'url',
         ...(effectiveStyleId && { style_id: effectiveStyleId })
       },
@@ -90,13 +92,13 @@ async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null
       const delay = RETRY_BASE_DELAY_MS * Math.pow(2, retryCount);
       logger.info(`Retrying Recraft in ${delay}ms`, { nextAttempt: retryCount + 1 });
       await sleep(delay);
-      return generateImage(imagePrompt, retryCount + 1, styleIdOverride, widthOverride, heightOverride);
+      return generateImage(imagePrompt, retryCount + 1, styleIdOverride);
     }
 
     throw new RecraftAPIError(`Recraft API failed after ${retryCount + 1} attempts: ${errMsg}`);
   }
 
-  // Download image locally
+  // Download image, crop to 5:2, and save locally
   const filename = `${uuidv4()}.jpg`;
   const outputsDir = ensureOutputsDir();
   const localPath = path.join(outputsDir, filename);
@@ -106,11 +108,36 @@ async function generateImage(imagePrompt, retryCount = 0, styleIdOverride = null
       responseType: 'arraybuffer',
       timeout: 30000
     });
-    fs.writeFileSync(localPath, imageResponse.data);
-    logger.info('Image saved locally', { filename, size: imageResponse.data.byteLength });
+
+    // Crop from 2:1 (1536x768) to 5:2 target ratio
+    // Target height = width / FINAL_RATIO = 1536 / 2.5 = 614.4 → 614
+    const srcBuffer = Buffer.from(imageResponse.data);
+    const meta = await sharp(srcBuffer).metadata();
+    const srcW = meta.width;
+    const srcH = meta.height;
+    const targetH = Math.round(srcW / FINAL_RATIO);
+
+    if (targetH < srcH) {
+      // Center-crop vertically to achieve 5:2
+      const top = Math.round((srcH - targetH) / 2);
+      const cropped = await sharp(srcBuffer)
+        .extract({ left: 0, top, width: srcW, height: targetH })
+        .jpeg({ quality: 92 })
+        .toBuffer();
+      fs.writeFileSync(localPath, cropped);
+      logger.info('Image cropped to 5:2 and saved', {
+        filename,
+        original: `${srcW}x${srcH}`,
+        cropped: `${srcW}x${targetH}`,
+        size: cropped.byteLength
+      });
+    } else {
+      // Already correct or narrower than target — save as-is
+      fs.writeFileSync(localPath, srcBuffer);
+      logger.info('Image saved locally (no crop needed)', { filename, size: srcBuffer.byteLength });
+    }
   } catch (downloadErr) {
-    logger.warn('Failed to download image locally, returning remote URL only', { error: downloadErr.message });
-    // Don't throw — return remote URL as fallback
+    logger.warn('Failed to download/crop image, returning remote URL only', { error: downloadErr.message });
     return { remoteUrl, localFilename: null, localPath: null };
   }
 

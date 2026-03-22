@@ -13,7 +13,13 @@ const CLAUDE_MAX_RETRIES = parseInt(process.env.CLAUDE_MAX_RETRIES || '2');
 
 let _client = null;
 function getClient() {
-  if (!_client) _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  if (!_client) {
+    const opts = { apiKey: process.env.ANTHROPIC_API_KEY };
+    if (process.env.ANTHROPIC_BASE_URL) {
+      opts.baseURL = process.env.ANTHROPIC_BASE_URL;
+    }
+    _client = new Anthropic(opts);
+  }
   return _client;
 }
 

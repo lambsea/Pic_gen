@@ -41,6 +41,18 @@
       "name": "科技风",
       "label": "科技风",
       "note": "数字电路、粒子光效、未来科幻"
+    },
+    {
+      "id": "c11e6f56-29e6-4ae4-ab95-1b122ebb86d7",
+      "name": "DanKoe 风格",
+      "label": "DanKoe 风格",
+      "note": "DanKoe 个人品牌风格、简约大气、知识创作者美学"
+    },
+    {
+      "id": "17097d99-4509-4c0a-b41a-3d2a40069fcc",
+      "name": "Pepe 风格",
+      "label": "Pepe 风格",
+      "note": "Pepe 风格插画、meme 美学、趣味表情"
     }
   ],
   "default": "b353ca48-e2f3-481e-8e9d-f8fda2f00748"

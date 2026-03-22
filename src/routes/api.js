@@ -152,17 +152,14 @@ router.post('/generate', async (req, res, next) => {
     return next(err);
   }
 
-  // --- Resolve platform dimensions ---
+  // --- Resolve platform (kept for metadata, Recraft uses fixed 2:1 → 5:2 crop) ---
   const platformId = (platform && PLATFORMS_MAP[platform]) ? platform : DEFAULT_PLATFORM_ID;
-  const platformCfg = PLATFORMS_MAP[platformId];
-  const imageWidth  = platformCfg.width;
-  const imageHeight = platformCfg.height;
 
-  // --- Recraft: Generate Image ---
+  // --- Recraft: Generate Image (2:1 preset, auto-cropped to 5:2) ---
   let imageResult;
   try {
     imageResult = await recraftService.generateImage(
-      claudeOutput.image_prompt, 0, style_id || null, imageWidth, imageHeight
+      claudeOutput.image_prompt, 0, style_id || null
     );
   } catch (err) {
     return next(err);
@@ -181,7 +178,7 @@ router.post('/generate', async (req, res, next) => {
     imageRemoteUrl: imageResult.remoteUrl,
     style_id: style_id || null,
     platform: platformId,
-    platformCfg,
+    platformCfg: PLATFORMS_MAP[platformId],
     author: (author && typeof author === 'string') ? author.trim() : null,
     generatedAt: new Date().toISOString(),
     mode,
